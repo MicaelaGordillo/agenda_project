@@ -1,7 +1,5 @@
-import 'dart:ffi';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sticky_headers/sticky_headers/widget.dart';
 
 class ScreenWork extends StatefulWidget {
   const ScreenWork({Key? key}) : super(key: key);
@@ -12,9 +10,9 @@ class ScreenWork extends StatefulWidget {
 
 class _ScreenWorkState extends State<ScreenWork> {
   int _selectedIndex = 0;
-  //late List<String> tareas = [];
   bool isChecked = false;
   final tareas = List<String>.generate(10000, (i) => "Tarea $i");
+  final frases = List<String>.generate(20, (i) => "Frase $i");
 
   void _onItemTapped(int index) {
     setState(() {
@@ -34,7 +32,7 @@ class _ScreenWorkState extends State<ScreenWork> {
             child: Column(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top:30),
+                  margin: const EdgeInsets.only(top:20, bottom: 0),
                   padding: const EdgeInsets.all(20),
                   width: double.infinity,//Toma el largo horizontal
                   //color: Colors.grey[100], //Color de fondo
@@ -54,54 +52,18 @@ class _ScreenWorkState extends State<ScreenWork> {
                     ],
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.only(top:5),
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  child: const Text('Primera frase'),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top:5),
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  child: const Text('Segunda frase'),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top:5),
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  child: const Text('Tercer frase'),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top:5),
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  child: const Text('Cuarta frase'),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top:5),
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  child: const Text('Quinta frase'),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top:5),
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  child: const Text('Sexta frase'),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top:5),
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  color: Colors.grey[100],
-                  child: const Text('Septima frase'),
+                Expanded(
+                    child: ListView.builder(
+                      itemCount: frases.length,
+                      itemBuilder: (context, index) => Card(
+                        margin: const EdgeInsets.only(bottom: 2),
+                        color: Colors.grey[100],
+                        child: ListTile(
+                          title: Text('${frases[index]}'),
+                          subtitle: Text('Icream is good for health'),
+                        ),
+                      ),
+                    ),
                 ),
               ],
             ),
@@ -132,31 +94,68 @@ class _ScreenWorkState extends State<ScreenWork> {
                 )
               ],
             ),
-            child: ListView.builder(
-              itemCount: tareas.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Checkbox(
-                    activeColor: const Color.fromRGBO(170, 218, 199, 100),
-                    value: isChecked,
-                    onChanged: (value) {
-                      setState(() {
-                        print(index);
-                        isChecked = value!;
-                      });
-                    },
+            child: Column(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color.fromRGBO(226, 221, 235, 100),
+                        width: 3.0,
+                      ),
+                    )
                   ),
-                  title: Text('${tareas[index]}'),
-                  trailing: IconButton(
-                      onPressed: (){
-                        setState(() {
-                          print(index);
-                        });
-                      },
-                      icon: Icon(Icons.delete)
+                  child: ListTile(
+                    leading: Image.asset('assets/check.png', height: 35),
+                    title: const Text(
+                      'Todas las tareas',
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                );
-              },
+                ),
+                Expanded(
+                    child: ListView.builder(
+                      itemCount: tareas.length,
+                      itemBuilder: (context, index) => Card(
+                        margin: const EdgeInsets.only(bottom: 2),
+                        child: ListTile(
+                          leading: Checkbox(
+                            activeColor: const Color.fromRGBO(170, 218, 199, 100),
+                            value: isChecked,
+                            onChanged: (value) {
+                              setState(() {
+                                print(index);
+                                isChecked = value!;
+                              });
+                            },
+                          ),
+                          title: Text('${tareas[index]}'),
+                          subtitle: Text('Icream is good for health'),
+                          trailing: CircleAvatar(
+                            backgroundColor: const Color.fromRGBO(255, 204, 163, 100),
+                            radius: 15,
+                            child: IconButton(
+                              onPressed: (){
+                                setState(() {
+                                  print(index);
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                                size: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ),
+              ],
             ),
           ),
         ),
@@ -186,6 +185,51 @@ class _ScreenWorkState extends State<ScreenWork> {
               iconSize: 30,
               onTap: _onItemTapped,
             ),
+        ),
+        /*floatingActionButton: Container(
+          height: 40,
+          width: 40,
+          child: FloatingActionButton(
+            child: Icon(Icons.add, size: 30,),
+            backgroundColor: Colors.grey,
+            onPressed: (){
+            },
+          ),
+        ),*/
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: Stack(
+          children: [
+            Positioned(
+              right: 15,
+              top: 170,
+              child: Container(
+                height: 50,
+                width: 50,
+                child: FloatingActionButton(
+                  child: const Icon(Icons.mic, size: 30,),
+                  backgroundColor: Colors.grey,
+                  onPressed: (){
+                  },
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 15,
+              right: 40,
+              child: Container(
+                height: 40,
+                width: 40,
+                child: FloatingActionButton(
+                  child: const Icon(Icons.add, size: 30,),
+                  backgroundColor: Colors.grey,
+                  onPressed: (){
+                  },
+                ),
+              ),
+            ),
+            // Add more floating buttons if you want
+            // There is no limit
+          ],
         ),
       ),
     );
