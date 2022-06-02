@@ -1,4 +1,5 @@
 import 'package:agenda_project/screens/screen_actividades.dart';
+import 'package:agenda_project/screens/screen_alarmas.dart';
 import 'package:agenda_project/screens/screen_tareas.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Agenda',
-      home: ScreenWork(),
+      home: ScreenAlarm(),
     );
   }
 }
