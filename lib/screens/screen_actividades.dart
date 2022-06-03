@@ -182,39 +182,12 @@ class _ScreenActividadesState extends State<ScreenActividades> {
             ),
           ),
         ),
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                  color: Color.fromRGBO(0, 0, 0, 0.4),
-                  blurRadius: 25,
-                  offset: Offset(0.0, 0.75)
-              )
-            ],
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Inicio'),
-              BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/tareas.png')), label: 'Tareas'),
-              BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/horario.png')), label: 'Horario'),
-              BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/alarma.png')), label: 'Alarma'),
-            ],
-            currentIndex: _selectedIndex,
-            selectedItemColor: const Color.fromRGBO(33, 150, 243, 100),
-            unselectedItemColor: const Color.fromRGBO(169, 151, 196, 100),
-            unselectedFontSize: 17,
-            selectedFontSize: 17,
-            iconSize: 30,
-            onTap: _onItemTapped,
-          ),
-        ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Stack(
           children: [
             Positioned(
               right: 15,
-              top: 170,
+              top: 90,
               child: Container(
                 height: 50,
                 width: 50,
