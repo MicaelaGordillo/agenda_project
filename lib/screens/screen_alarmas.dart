@@ -131,6 +131,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                         color: Color.fromRGBO(255, 204, 163, 1),
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'Quicksand',
                       ),
                     ),
                   ),
@@ -145,7 +146,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                       color: colorBack[getColor()],
                       child: ListTile(
                         leading: Image.asset('assets/reloj.png', height: 35),
-                        title: Text('${alarms[index].descripcion} ', style: TextStyle(color: colorLetter[_colorSelected]),),
+                        title: Text('${alarms[index].descripcion} ', style: TextStyle(color: colorLetter[_colorSelected], fontFamily: 'DidactGothic'),),
                         subtitle: Text('${DateFormat('dd-MM-yyyy').format(alarms[index].fecha)} ${alarms[index].hora.hour}:${alarms[index].hora.minute}', style: const TextStyle(color: Color.fromRGBO(113, 113, 113, 1)),),
                         trailing: CircleAvatar(
                           backgroundColor: Colors.white,
