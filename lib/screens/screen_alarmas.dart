@@ -1,9 +1,12 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import '../clases/alarm.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:avatar_glow/avatar_glow.dart';
+import 'package:highlight_text/highlight_text.dart';
 
 class ScreenAlarm extends StatefulWidget {
   List <Alarm> alarmas;
@@ -45,6 +48,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   @override
   void initState(){
     super.initState();
+    _speech = stt.SpeechToText();
     var initializationSettingsAndroid = new AndroidInitializationSettings('panda');
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
@@ -234,8 +238,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                 child: FloatingActionButton(
                   child: const Icon(Icons.mic, size: 30,color: Color.fromRGBO(255, 148, 66, 1),),
                   backgroundColor: const Color.fromRGBO(255, 204, 163, 1),
-                  onPressed: (){
-                  },
+                  onPressed: _listen,
                 ),
               ),
             ),
@@ -249,138 +252,174 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                   child: const Icon(Icons.add, size: 30, color: Color.fromRGBO(255, 148, 66, 1),),
                   backgroundColor: const Color.fromRGBO(255, 204, 163, 1),
                   onPressed: (){
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Programa tu alarma'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                const Text('Fecha: ', style: TextStyle(color: Colors.grey),),
-                                Expanded(
-                                    child: TextFormField(
-                                      controller: date,
-                                      readOnly: true,
-                                      decoration: const InputDecoration(
-                                        hintText: 'Ingresa una fecha',
-                                        border: UnderlineInputBorder(),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.grey),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.orangeAccent),
-                                        ),
-                                      ),
-                                    )
-                                ),
-                                CircleAvatar(
-                                  backgroundColor: Colors.orangeAccent,
-                                  radius: 20,
-                                  child: IconButton(
-                                    onPressed: () async {
-                                      _myDateTime = (await showDatePicker(
-                                          context: context,
-                                          initialDate: DateTime.now(),
-                                          firstDate: DateTime(2010),
-                                          lastDate: DateTime(2030)
-                                      ))!;
-                                      setState(() {
-                                        date.text = DateFormat('dd-MM-yyyy').format(_myDateTime);
-                                      });
-                                    },
-                                    icon: const Icon(Icons.calendar_today_outlined, color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                const Text('Hora: ', style: TextStyle(color: Colors.grey),),
-                                Expanded(
-                                    child: TextFormField(
-                                      controller: hour,
-                                      readOnly: true,
-                                      decoration: const InputDecoration(
-                                        hintText: 'Ingresa una hora',
-                                        border: UnderlineInputBorder(),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.grey),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.orangeAccent),
-                                        ),
-                                      ),
-                                    )
-                                ),
-                                CircleAvatar(
-                                  backgroundColor: Colors.orangeAccent,
-                                  radius: 20,
-                                  child: IconButton(
-                                    onPressed: () async {
-                                      _myHourTime = (await showTimePicker(
-                                          context: context,
-                                          initialTime: TimeOfDay.now()
-                                      ))!;
-                                      setState(() {
-                                        hour.text = '${_myHourTime.hour}:${_myHourTime.minute}';
-                                      });
-                                    },
-                                    icon: const Icon(Icons.access_alarm, color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          FlatButton(
-                              onPressed: (){
-                                setState(() {
-                                  Navigator.of(context).pop();
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Programa tu alarma'),
-                                        content: TextField(
-                                          controller: name,
-                                          decoration: InputDecoration(
-                                            hintText: 'Ingresar el nombre de la alarma',
-                                            filled: true,
-                                            fillColor: Colors.grey.shade50,
-                                          ),
-                                        ),
-                                        actions: [
-                                          FlatButton(
-                                              onPressed: (){
-                                                setState(() {
-                                                  Alarm aux = Alarm(_myDateTime, _myHourTime, name.text.toString());
-                                                  alarms.add(aux);
-                                                  Navigator.of(context).pop();
-                                                  hour.text = '';
-                                                  date.text = '';
-                                                  name.text = '';
-                                                });
-                                              },
-                                              child: const Text('Ok')
-                                          )
-                                        ],
-                                      )
-                                  );
-                                });
-                              },
-                              child: const Text('Ok')
-                          )
-                        ],
-                      ),
-                    );
+                    modalAlarma();
                   },
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = 'Presiona el botón y empieza a hablar';
+  double _confidence = 1.0;
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _text = val.recognizedWords;
+            print(_text);
+            if(_text.contains('añadir alarma') || _text.contains('Añadir alarma')){
+              modalAlarma();
+            }
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _confidence = val.confidence;
+            }
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
+  modalAlarma(){
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Programa tu alarma'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Text('Fecha: ', style: TextStyle(color: Colors.grey),),
+                Expanded(
+                    child: TextFormField(
+                      controller: date,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Ingresa una fecha',
+                        border: UnderlineInputBorder(),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orangeAccent),
+                        ),
+                      ),
+                    )
+                ),
+                CircleAvatar(
+                  backgroundColor: Colors.orangeAccent,
+                  radius: 20,
+                  child: IconButton(
+                    onPressed: () async {
+                      _myDateTime = (await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2010),
+                          lastDate: DateTime(2030)
+                      ))!;
+                      setState(() {
+                        date.text = DateFormat('dd-MM-yyyy').format(_myDateTime);
+                      });
+                    },
+                    icon: const Icon(Icons.calendar_today_outlined, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Text('Hora: ', style: TextStyle(color: Colors.grey),),
+                Expanded(
+                    child: TextFormField(
+                      controller: hour,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Ingresa una hora',
+                        border: UnderlineInputBorder(),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orangeAccent),
+                        ),
+                      ),
+                    )
+                ),
+                CircleAvatar(
+                  backgroundColor: Colors.orangeAccent,
+                  radius: 20,
+                  child: IconButton(
+                    onPressed: () async {
+                      _myHourTime = (await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now()
+                      ))!;
+                      setState(() {
+                        hour.text = '${_myHourTime.hour}:${_myHourTime.minute}';
+                      });
+                    },
+                    icon: const Icon(Icons.access_alarm, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          FlatButton(
+              onPressed: (){
+                setState(() {
+                  Navigator.of(context).pop();
+                  showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Programa tu alarma'),
+                        content: TextField(
+                          controller: name,
+                          decoration: InputDecoration(
+                            hintText: 'Ingresar el nombre de la alarma',
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                          ),
+                        ),
+                        actions: [
+                          FlatButton(
+                              onPressed: (){
+                                setState(() {
+                                  Alarm aux = Alarm(_myDateTime, _myHourTime, name.text.toString());
+                                  alarms.add(aux);
+                                  Navigator.of(context).pop();
+                                  hour.text = '';
+                                  date.text = '';
+                                  name.text = '';
+                                });
+                              },
+                              child: const Text('Ok')
+                          )
+                        ],
+                      )
+                  );
+                });
+              },
+              child: const Text('Ok')
+          )
+        ],
       ),
     );
   }

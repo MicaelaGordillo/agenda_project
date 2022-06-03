@@ -2,6 +2,10 @@ import 'package:agenda_project/clases/actividad.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../clases/tarea.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:avatar_glow/avatar_glow.dart';
+import 'package:highlight_text/highlight_text.dart';
 
 class ScreenActividades extends StatefulWidget {
   List<Actividad> activities;
@@ -26,6 +30,12 @@ class _ScreenActividadesState extends State<ScreenActividades> {
   TextEditingController valorHoraFinal = TextEditingController();
   TextEditingController valorFechaInicio = TextEditingController();
   TextEditingController valorFechaFinal = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
 
   void insertActividad(Actividad actividad){
     actividades.add(actividad);
@@ -196,8 +206,7 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                 child: FloatingActionButton(
                   child: const Icon(Icons.mic, size: 30, color: Color.fromRGBO(189, 211, 135, 1),),
                   backgroundColor: Color.fromRGBO(233, 240, 215, 1),
-                  onPressed: (){
-                  },
+                  onPressed: _listen,
                 ),
               ),
             ),
@@ -223,6 +232,39 @@ class _ScreenActividadesState extends State<ScreenActividades> {
       ),
     );
   }
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = 'Presiona el botón y empieza a hablar';
+  double _confidence = 1.0;
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _text = val.recognizedWords;
+            print(_text);
+            if(_text.contains('añadir tarea') || _text.contains('Añadir tarea')){
+              modalAddTarea(context);
+            }
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _confidence = val.confidence;
+            }
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
   modalAddTarea(BuildContext context){
     Widget okButton = TextButton(
         style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Color.fromRGBO(189, 211, 135, 1))),
