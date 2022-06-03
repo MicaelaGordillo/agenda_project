@@ -37,7 +37,6 @@ class funciones{
         cod_tarea: maps[i]['cod_tarea'],
         descripcion: maps[i]['descripcion'],
         fecha_inicio: maps[i]['fecha_inicio'],
-        fecha_final: maps[i]['fecha_final'],
         terminada: maps[i]['terminada'],
       );
     });

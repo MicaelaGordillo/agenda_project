@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Alarm {
-  DateTime _fecha;
-  TimeOfDay _hora;
+  String _fecha;
+  String _hora;
   String _descripcion;
 
   Alarm(this._fecha, this._hora, this._descripcion);
@@ -13,15 +13,15 @@ class Alarm {
     _descripcion = value;
   }
 
-  TimeOfDay get hora => _hora;
+  String get hora => _hora;
 
-  set hora(TimeOfDay value) {
+  set hora(String value) {
     _hora = value;
   }
 
-  DateTime get fecha => _fecha;
+  String get fecha => _fecha;
 
-  set fecha(DateTime value) {
+  set fecha(String value) {
     _fecha = value;
   }
 

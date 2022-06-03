@@ -147,7 +147,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                       child: ListTile(
                         leading: Image.asset('assets/reloj.png', height: 35),
                         title: Text('${alarms[index].descripcion} ', style: TextStyle(color: colorLetter[_colorSelected], fontFamily: 'DidactGothic'),),
-                        subtitle: Text('${DateFormat('dd-MM-yyyy').format(alarms[index].fecha)} ${alarms[index].hora.hour}:${alarms[index].hora.minute}', style: const TextStyle(color: Color.fromRGBO(113, 113, 113, 1)),),
+                        subtitle: Text('${alarms[index].fecha} ${alarms[index].hora}', style: const TextStyle(color: Color.fromRGBO(113, 113, 113, 1)),),
                         trailing: CircleAvatar(
                           backgroundColor: Colors.white,
                           radius: 20,
@@ -331,7 +331,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                                           FlatButton(
                                               onPressed: (){
                                                 setState(() {
-                                                  Alarm aux = Alarm(_myDateTime, _myHourTime, name.text.toString());
+                                                  Alarm aux = Alarm(date.text.toString(), hour.text.toString(), name.text.toString());
                                                   alarms.add(aux);
                                                   Navigator.of(context).pop();
                                                 });
@@ -367,12 +367,12 @@ class BluePainter extends CustomPainter {
 
     Paint circleGrey = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color.fromRGBO(226, 221, 235, 100)
+      ..color = const Color.fromRGBO(226, 221, 235, 1)
       ..strokeWidth = 2;
 
     Paint circlePink = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color.fromRGBO(245, 214, 199, 100)
+      ..color = const Color.fromRGBO(245, 214, 199, 1)
       ..strokeWidth = 2;
 
     canvas.drawCircle(Offset(width*0.05, height*0.23), 100, circleGrey);
