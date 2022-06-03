@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import '../clases/tarea.dart';
 
 class ScreenWork extends StatefulWidget {
-  const ScreenWork({Key? key}) : super(key: key);
+  List<Tarea> works;
+  ScreenWork(this.works);
 
   @override
   State<ScreenWork> createState() => _ScreenWorkState();
@@ -36,6 +37,7 @@ class _ScreenWorkState extends State<ScreenWork> {
 
   @override
   Widget build(BuildContext context) {
+    tareas = widget.works;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',

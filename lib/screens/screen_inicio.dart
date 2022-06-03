@@ -1,3 +1,4 @@
+import 'package:agenda_project/screens/screen_alarmas.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../clases/actividad.dart';
@@ -5,7 +6,10 @@ import '../clases/alarm.dart';
 import '../clases/tarea.dart';
 
 class ScreenMain extends StatefulWidget {
-  const ScreenMain({Key? key}) : super(key: key);
+  List<Tarea> works;
+  List <Alarm> alarmas;
+  List<Actividad> activities;
+  ScreenMain(this.works, this. alarmas, this.activities);
 
   @override
   State<ScreenMain> createState() => _ScreenMainState();
@@ -26,27 +30,12 @@ class _ScreenMainState extends State<ScreenMain> {
     });
   }
 
-  void llenarListas(){
-    var tarea1 = Tarea(cod_tarea: 1, descripcion: 'Tarea física', fecha_inicio: '2022-06-03', terminada: false);
-    var tarea2 = Tarea(cod_tarea: 2, descripcion: 'Tarea matemáticas', fecha_inicio: '2022-06-03', terminada: false);
-    tareas.add(tarea1); tareas.add(tarea2);
-    var actividad = Actividad(
-      cod_actividad: 0,
-      descripcion: 'Ir al gymnasio',
-      fecha_inicio: '2022-06-03',
-      fecha_final: '2022-06-13',
-      hora_inicio: '08:30',
-      hora_final: '10:00',
-    );
-    actividades.add(actividad); actividades.add(actividad);
-    Alarm aux = Alarm('20220-06-13', '10:00', 'Alarma 1');
-    Alarm aux1 = Alarm('20220-06-08', '15:35', 'Alarma 2');
-    alarms.add(aux); alarms.add(aux1);
-  }
-
   @override
   Widget build(BuildContext context) {
-    llenarListas();
+    tareas = widget.works;
+    alarms = widget.alarmas;
+    actividades = widget.activities;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
@@ -270,10 +259,15 @@ class _ScreenMainState extends State<ScreenMain> {
                           ),
                         ),
                       ),
-                      const ListTile(
-                        trailing: Text('Ver más',
-                          style: TextStyle(color: Colors.blue, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Quicksand',),
+                      RaisedButton(
+                        color: Colors.white,
+                        child: const ListTile(
+                          trailing: Text('Ver más',
+                            style: TextStyle(color: Colors.blue, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Quicksand',),
+                          ),
                         ),
+                        onPressed: (){
+                        }
                       ),
                       const SizedBox(height: 20),
                     ],

@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import '../clases/alarm.dart';
 
 class ScreenAlarm extends StatefulWidget {
-  const ScreenAlarm({Key? key}) : super(key: key);
+  List <Alarm> alarmas;
+  ScreenAlarm(this.alarmas);
 
   @override
   State<ScreenAlarm> createState() => _ScreenAlarmState();
@@ -39,6 +40,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
 
   @override
   Widget build(BuildContext context) {
+    alarms = widget.alarmas;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',

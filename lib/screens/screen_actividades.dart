@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import '../clases/tarea.dart';
 
 class ScreenActividades extends StatefulWidget {
-  const ScreenActividades({Key? key}) : super(key: key);
+  List<Actividad> activities;
+  ScreenActividades(this.activities);
 
   @override
   State<ScreenActividades> createState() => _ScreenActividadesState();
@@ -39,6 +40,7 @@ class _ScreenActividadesState extends State<ScreenActividades> {
 
   @override
   Widget build(BuildContext context) {
+    actividades = widget.activities;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
