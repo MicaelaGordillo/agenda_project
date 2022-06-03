@@ -38,6 +38,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   sticky_headers: ^0.3.0+2
   flutter_local_notifications:
+  speech_to_text: ^5.5.0 #Nos permite tomas la entrada de voz usando el microfono y convertirla en texto.
+  highlight_text: ^1.4.0 #Nos permite resaltar las palabras y transformarlas claves.
+  avatar_glow: ^2.0.2 #Nos permite una animación bonita.
+  flutter_tts: ^3.4.0
 
 dev_dependencies:
   flutter_test:

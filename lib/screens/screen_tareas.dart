@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../clases/tarea.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:avatar_glow/avatar_glow.dart';
+import 'package:highlight_text/highlight_text.dart';
 
 class ScreenWork extends StatefulWidget {
   List<Tarea> works;
@@ -21,7 +25,11 @@ class _ScreenWorkState extends State<ScreenWork> {
   TextEditingController miVar = TextEditingController();
   TextEditingController valorFechaInicio = TextEditingController();
   TextEditingController valorFechaFinal = TextEditingController();
-
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
 
 
   void insertTarea(Tarea tarea){
@@ -195,8 +203,7 @@ class _ScreenWorkState extends State<ScreenWork> {
                 child: FloatingActionButton(
                   child: const Icon(Icons.mic, size: 30, color: Color.fromRGBO(169, 151, 196, 1),),
                   backgroundColor: const Color.fromRGBO(226, 221, 235, 1),
-                  onPressed: (){
-                  },
+                  onPressed: _listen,
                 ),
               ),
             ),
@@ -221,6 +228,37 @@ class _ScreenWorkState extends State<ScreenWork> {
         ),
       ),
     );
+  }
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = 'Presiona el botón y empieza a hablar';
+  double _confidence = 1.0;
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _text = val.recognizedWords;
+            print(_text);
+            if(_text.contains('añadir tarea') || _text.contains('Añadir tarea')){
+              modalAddTarea(context);
+            }
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _confidence = val.confidence;
+            }
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
   }
   modalAddTarea(BuildContext context){
     Widget okButton = TextButton(
@@ -319,49 +357,6 @@ class _ScreenWorkState extends State<ScreenWork> {
                       }
                   )
               )
-            ],
-          ),
-          const SizedBox(height: 6,),
-          Row(
-            children: <Widget>[
-              const Text('Fecha final:', style: TextStyle(fontSize: 14)),
-              const SizedBox(width: 10,),
-              Expanded(
-                child: TextField(
-                  style: const TextStyle(fontSize: 14),
-                  controller: valorFechaFinal,
-                  keyboardType: TextInputType.none,
-                  decoration: const InputDecoration(
-                    hintText: 'Ingresa una fecha',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                    contentPadding: EdgeInsets.all(6),
-                  ) ,
-                ),
-              ),
-              const SizedBox(width: 4,),
-              SizedBox(
-                  height: 30,
-                  width: 30,
-                  child: RawMaterialButton(
-                      fillColor: const Color.fromRGBO(169, 151, 196, 1),
-                      shape: const CircleBorder(),
-                      elevation: 0.0,
-                      child: const Icon(Icons.date_range, color: Colors.white, size: 17,),
-                      onPressed: () async{
-                        _myDateTime = (await showDatePicker(
-                            firstDate: DateTime(2010),
-                            initialDate: DateTime.now(),
-                            context: context,
-                            lastDate: DateTime(2030)
-                        ))!;
-                        setState((){
-                          valorFechaFinal.text = DateFormat('dd-MM-yy').format(_myDateTime);
-                        });
-                      }
-                  )
-              )
-
             ],
           ),
         ],
