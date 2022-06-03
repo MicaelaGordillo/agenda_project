@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import '../clases/tarea.dart';
 
 class ScreenWork extends StatefulWidget {
-  const ScreenWork({Key? key}) : super(key: key);
+  List<Tarea> works;
+  ScreenWork(this.works);
 
   @override
   State<ScreenWork> createState() => _ScreenWorkState();
@@ -36,6 +37,7 @@ class _ScreenWorkState extends State<ScreenWork> {
 
   @override
   Widget build(BuildContext context) {
+    tareas = widget.works;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
@@ -75,8 +77,8 @@ class _ScreenWorkState extends State<ScreenWork> {
                         margin: const EdgeInsets.only(bottom: 2),
                         color: Colors.grey[100],
                         child: ListTile(
-                          title: Text('${frases[index]}'),
-                          subtitle: Text('Icream is good for health'),
+                          title: Text(frases[index]),
+                          subtitle: const Text('Icream is good for health'),
                         ),
                       ),
                     ),
@@ -154,7 +156,7 @@ class _ScreenWorkState extends State<ScreenWork> {
                               });
                             },
                           ),
-                          title: Text('${tareas[index].descripcion}', style: TextStyle(fontFamily: 'DidactGothic')),
+                          title: Text(tareas[index].descripcion, style: TextStyle(fontFamily: 'DidactGothic')),
                           //subtitle: Text('Icream is good for health'),
                           trailing: CircleAvatar(
                             backgroundColor: const Color.fromRGBO(255, 212, 212, 1),
@@ -192,7 +194,7 @@ class _ScreenWorkState extends State<ScreenWork> {
                 width: 50,
                 child: FloatingActionButton(
                   child: const Icon(Icons.mic, size: 30, color: Color.fromRGBO(169, 151, 196, 1),),
-                  backgroundColor: Color.fromRGBO(226, 221, 235, 1),
+                  backgroundColor: const Color.fromRGBO(226, 221, 235, 1),
                   onPressed: (){
                   },
                 ),
@@ -201,12 +203,12 @@ class _ScreenWorkState extends State<ScreenWork> {
             Positioned(
               bottom: 15,
               right: 40,
-              child: Container(
+              child: SizedBox(
                 height: 40,
                 width: 40,
                 child: FloatingActionButton(
                   child: const Icon(Icons.add, size: 30,color: Color.fromRGBO(169, 151, 196, 1)),
-                  backgroundColor: Color.fromRGBO(226, 221, 235, 1),
+                  backgroundColor: const Color.fromRGBO(226, 221, 235, 1),
                   onPressed: (){
                     modalAddTarea(context);
                   },
@@ -231,7 +233,6 @@ class _ScreenWorkState extends State<ScreenWork> {
                 cod_tarea: 1,
                 descripcion: miVar.text,
                 fecha_inicio: valorFechaInicio.text,
-                fecha_final: valorFechaFinal.text,
                 terminada: false
             );
             insertTarea(tarea);
@@ -254,8 +255,6 @@ class _ScreenWorkState extends State<ScreenWork> {
         },child: const Text('Cancelar', style: TextStyle(fontSize: 15, color: Colors.white),)
     );
 
-
-
     AlertDialog alert = AlertDialog(
       title: const Text('Ingresar nueva tarea', style: TextStyle(color: Color.fromRGBO(56, 56, 56, 1))),
       content:
@@ -265,10 +264,10 @@ class _ScreenWorkState extends State<ScreenWork> {
           Row(
             children: <Widget>[
               const Text('Tarea:', style: TextStyle(fontSize: 14),),
-              SizedBox(width: 4,),
+              const SizedBox(width: 4,),
               Expanded(
                 child: TextField(
-                  style:TextStyle(fontSize: 14),
+                  style:const TextStyle(fontSize: 14),
                   controller: miVar,
                   decoration: const InputDecoration(
                     hintText: 'Ingresa una tarea',
@@ -280,14 +279,14 @@ class _ScreenWorkState extends State<ScreenWork> {
               ),
             ],
           ),
-          SizedBox(height: 6,),
+          const SizedBox(height: 6,),
           Row(
             children: <Widget>[
               const Text('Fecha inicio:',style: TextStyle(fontSize: 14)),
-              SizedBox(width: 4,),
+              const SizedBox(width: 4,),
               Expanded(
                 child: TextField(
-                  style: TextStyle(fontSize: 14),
+                  style: const TextStyle(fontSize: 14),
                   controller: valorFechaInicio,
                   keyboardType: TextInputType.none,
                   decoration: const InputDecoration(
@@ -298,15 +297,15 @@ class _ScreenWorkState extends State<ScreenWork> {
                   ) ,
                 ),
               ),
-              SizedBox(width: 4,),
-              Container(
+              const SizedBox(width: 4,),
+              SizedBox(
                   height: 30,
                   width: 30,
                   child: RawMaterialButton(
-                      fillColor: Color.fromRGBO(169, 151, 196, 1),
-                      shape: CircleBorder(),
+                      fillColor: const Color.fromRGBO(169, 151, 196, 1),
+                      shape: const CircleBorder(),
                       elevation: 0.0,
-                      child: Icon(Icons.date_range, color: Colors.white, size: 17,),
+                      child: const Icon(Icons.date_range, color: Colors.white, size: 17,),
                       onPressed: () async{
                         _myDateTime = (await showDatePicker(
                             firstDate: DateTime(2010),
@@ -322,14 +321,14 @@ class _ScreenWorkState extends State<ScreenWork> {
               )
             ],
           ),
-          SizedBox(height: 6,),
+          const SizedBox(height: 6,),
           Row(
             children: <Widget>[
               const Text('Fecha final:', style: TextStyle(fontSize: 14)),
-              SizedBox(width: 10,),
+              const SizedBox(width: 10,),
               Expanded(
                 child: TextField(
-                  style: TextStyle(fontSize: 14),
+                  style: const TextStyle(fontSize: 14),
                   controller: valorFechaFinal,
                   keyboardType: TextInputType.none,
                   decoration: const InputDecoration(
@@ -340,15 +339,15 @@ class _ScreenWorkState extends State<ScreenWork> {
                   ) ,
                 ),
               ),
-              SizedBox(width: 4,),
-              Container(
+              const SizedBox(width: 4,),
+              SizedBox(
                   height: 30,
                   width: 30,
                   child: RawMaterialButton(
-                      fillColor: Color.fromRGBO(169, 151, 196, 1),
-                      shape: CircleBorder(),
+                      fillColor: const Color.fromRGBO(169, 151, 196, 1),
+                      shape: const CircleBorder(),
                       elevation: 0.0,
-                      child: Icon(Icons.date_range, color: Colors.white, size: 17,),
+                      child: const Icon(Icons.date_range, color: Colors.white, size: 17,),
                       onPressed: () async{
                         _myDateTime = (await showDatePicker(
                             firstDate: DateTime(2010),

@@ -6,7 +6,8 @@ import 'package:intl/intl.dart';
 import '../clases/alarm.dart';
 
 class ScreenAlarm extends StatefulWidget {
-  const ScreenAlarm({Key? key}) : super(key: key);
+  List <Alarm> alarmas;
+  ScreenAlarm(this.alarmas);
 
   @override
   State<ScreenAlarm> createState() => _ScreenAlarmState();
@@ -72,6 +73,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   }
   @override
   Widget build(BuildContext context) {
+    alarms = widget.alarmas;
     Timer miTimer = Timer.periodic(Duration(seconds: 10),(timer){
       //El codigo se ejecuta cada 30 seg
       for(int i=0;i<alarms.length;i++){
@@ -392,12 +394,12 @@ class BluePainter extends CustomPainter {
 
     Paint circleGrey = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color.fromRGBO(226, 221, 235, 100)
+      ..color = const Color.fromRGBO(226, 221, 235, 1)
       ..strokeWidth = 2;
 
     Paint circlePink = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color.fromRGBO(245, 214, 199, 100)
+      ..color = const Color.fromRGBO(245, 214, 199, 1)
       ..strokeWidth = 2;
 
     canvas.drawCircle(Offset(width*0.05, height*0.23), 100, circleGrey);

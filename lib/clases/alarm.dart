@@ -24,5 +24,4 @@ class Alarm {
   set fecha(DateTime value) {
     _fecha = value;
   }
-
 }

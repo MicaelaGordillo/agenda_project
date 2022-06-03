@@ -1,7 +1,11 @@
 import 'package:agenda_project/screens/screen_actividades.dart';
 import 'package:agenda_project/screens/screen_alarmas.dart';
+import 'package:agenda_project/screens/screen_inicio.dart';
 import 'package:agenda_project/screens/screen_tareas.dart';
 import 'package:flutter/material.dart';
+import 'clases/actividad.dart';
+import 'clases/alarm.dart';
+import 'clases/tarea.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MyAppStf(),
     );
   }
@@ -27,21 +31,26 @@ class MyAppStf extends StatefulWidget {
 
 class _MyAppStfState extends State<MyAppStf> {
   late List<Widget> _pages;
+  late Widget _page0;
   late Widget _page1;
   late Widget _page2;
   late Widget _page3;
   late int _currentIndex;
   late Widget _currentPage;
+  List<Tarea> tareas = [];
+  List <Alarm> alarms = [];
+  List<Actividad> actividades = [];
 
   @override
   void initState() {
     super.initState();
-    _page1 = const ScreenWork();
-    _page2 = const ScreenActividades();
-    _page3 = const ScreenAlarm();
-    _pages = [_page1, _page2, _page3];
+    _page0 = ScreenMain(tareas, alarms, actividades);
+    _page1 = ScreenWork(tareas);
+    _page2 = ScreenActividades(actividades);
+    _page3 = ScreenAlarm(alarms);
+    _pages = [_page0, _page1, _page2, _page3];
     _currentIndex = 0;
-    _currentPage = _page1;
+    _currentPage = _page0;
   }
 
   void _changeTab(int index) {
@@ -51,9 +60,35 @@ class _MyAppStfState extends State<MyAppStf> {
     });
   }
 
+  void llenarListas(){
+    var tarea1 = Tarea(cod_tarea: 1, descripcion: 'Tarea física', fecha_inicio: '2022-06-03', terminada: false);
+    var tarea2 = Tarea(cod_tarea: 2, descripcion: 'Tarea matemáticas', fecha_inicio: '2022-06-03', terminada: false);
+    if(tareas.isEmpty){
+      tareas.add(tarea1); tareas.add(tarea2);
+    } else {
+      if(tareas.length == 1){
+        tareas.add(tarea1);
+      }
+    }
+    var actividad1 = Actividad(cod_actividad: 0,descripcion: 'Ir al gymnasio',fecha_inicio: '2022-06-03', fecha_final: '2022-06-13', hora_inicio: '08:30', hora_final: '10:00',);
+    var actividad2 = Actividad(cod_actividad: 0, descripcion: 'Comer fruta', fecha_inicio: '2022-06-03', fecha_final: '2022-06-13', hora_inicio: '08:30', hora_final: '10:00',);
+    if(actividades.isEmpty){
+      actividades.add(actividad1); actividades.add(actividad2);
+    } else if (actividades.length == 1){
+      actividades.add(actividad1);
+    }
+    Alarm aux = Alarm(DateTime.now(), TimeOfDay.now(), 'Alarma 1');
+    Alarm aux1 = Alarm(DateTime.now(), TimeOfDay.now(), 'Alarma 2');
+    if(alarms.isEmpty){
+      alarms.add(aux); alarms.add(aux1);
+    } else if (alarms.length == 1){
+      alarms.add(aux);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    llenarListas();
     return Scaffold(
         body: _pages[_currentIndex],
         bottomNavigationBar: Container(
