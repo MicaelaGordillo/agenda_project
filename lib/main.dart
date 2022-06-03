@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MyAppStf(),
     );
   }
@@ -28,6 +28,7 @@ class MyAppStf extends StatefulWidget {
 
 class _MyAppStfState extends State<MyAppStf> {
   late List<Widget> _pages;
+  late Widget _page0;
   late Widget _page1;
   late Widget _page2;
   late Widget _page3;
@@ -37,12 +38,13 @@ class _MyAppStfState extends State<MyAppStf> {
   @override
   void initState() {
     super.initState();
+    _page0 = const ScreenMain();
     _page1 = const ScreenWork();
     _page2 = const ScreenActividades();
     _page3 = const ScreenAlarm();
-    _pages = [_page1, _page2, _page3];
+    _pages = [_page0, _page1, _page2, _page3];
     _currentIndex = 0;
-    _currentPage = _page1;
+    _currentPage = _page0;
   }
 
   void _changeTab(int index) {
