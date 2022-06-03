@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import '../clases/alarm.dart';
 
@@ -10,6 +13,8 @@ class ScreenAlarm extends StatefulWidget {
 }
 
 class _ScreenAlarmState extends State<ScreenAlarm> {
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  List<int> indexEjecutados = [];
   int _selectedIndex = 0;
   int _colorSelected = -1;
   List <Alarm> alarms = [];
@@ -36,9 +41,52 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
     }
     return _colorSelected;
   }
-
+  @override
+  void initState(){
+    super.initState();
+    var initializationSettingsAndroid = new AndroidInitializationSettings('panda');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    flutterLocalNotificationsPlugin =  new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,onSelectNotification: (String? payload) async {
+      if (payload != null) {
+        debugPrint('notification payload: $payload');
+      }
+    });
+  }
+  Future _showNotificationWithDefaultSound(String title) async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+        'your channel id', 'your channel name',
+        importance: Importance.max, priority: Priority.high,
+      icon: 'panda');
+    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      'Ya es hora de completar tu actividad 🥳',
+      platformChannelSpecifics,
+      payload: 'Default_Sound',
+    );
+  }
   @override
   Widget build(BuildContext context) {
+    Timer miTimer = Timer.periodic(Duration(seconds: 10),(timer){
+      //El codigo se ejecuta cada 30 seg
+      for(int i=0;i<alarms.length;i++){
+        print('hola $i');
+        print(TimeOfDay(hour: TimeOfDay.now().hour, minute: TimeOfDay.now().minute).toString());
+        print(DateTime.now().toString());
+        if(alarms[i].hora == TimeOfDay(hour: TimeOfDay.now().hour, minute: TimeOfDay.now().minute) && alarms[i].fecha.day == DateTime.now().day && alarms[i].fecha.month == DateTime.now().month && alarms[i].fecha.year == DateTime.now().year){
+          if(!indexEjecutados.contains(i)){
+            indexEjecutados.add(i);
+            print('es hora');
+            _showNotificationWithDefaultSound(alarms[i].descripcion);
+          }
+        }
+      }
+    });
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
@@ -155,6 +203,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                             onPressed: (){
                               setState(() {
                                 alarms.removeWhere((element) => (element == alarms[index]));
+                                indexEjecutados.remove(index);
                               });
                             },
                             icon: const Icon(
@@ -307,6 +356,9 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                                                   Alarm aux = Alarm(_myDateTime, _myHourTime, name.text.toString());
                                                   alarms.add(aux);
                                                   Navigator.of(context).pop();
+                                                  hour.text = '';
+                                                  date.text = '';
+                                                  name.text = '';
                                                 });
                                               },
                                               child: const Text('Ok')
