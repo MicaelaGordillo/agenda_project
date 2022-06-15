@@ -262,11 +262,23 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
       ),
     );
   }
-
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _text = 'Presiona el botón y empieza a hablar';
   double _confidence = 1.0;
+  bool _isReading = false;
+  FlutterTts flutertts = FlutterTts();
+  bool eliminar = false;
+  void _read (String text) async{
+    if (!_isReading) {
+      setState(() => _isReading = true);
+      await flutertts.setLanguage('es-ES');
+      await flutertts.setPitch(1);
+      await flutertts.speak(text);
+    } else {
+      setState(() => _isReading = false);
+    }
+  }
 
   void _listen() async {
     if (!_isListening) {
@@ -282,6 +294,21 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
             print(_text);
             if(_text.contains('añadir alarma') || _text.contains('Añadir alarma')){
               modalAlarma();
+            } else if(_text.contains('Eliminar alarma')|| _text.contains('eliminar alarma')){
+              _read('Ok!, dime el título de la alarma que quieres eliminar');
+              eliminar = true;
+            }else if(eliminar && _text.isNotEmpty){
+              print('entro');
+              for(int i=0;i<alarms.length;i++){
+                if(alarms[i].descripcion.toUpperCase()==_text.toUpperCase()){
+                  setState((){
+                    alarms.removeAt(i);
+                    print('Eliminado');
+                    _read('Ok! se eliminó la alarma');
+                  });
+                }
+              }
+              eliminar = false;
             }
             if (val.hasConfidenceRating && val.confidence > 0) {
               _confidence = val.confidence;

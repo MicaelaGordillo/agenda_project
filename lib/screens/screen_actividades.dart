@@ -232,11 +232,23 @@ class _ScreenActividadesState extends State<ScreenActividades> {
       ),
     );
   }
-
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _text = 'Presiona el botón y empieza a hablar';
   double _confidence = 1.0;
+  bool _isReading = false;
+  FlutterTts flutertts = FlutterTts();
+  bool eliminar = false;
+  void _read (String text) async{
+    if (!_isReading) {
+      setState(() => _isReading = true);
+      await flutertts.setLanguage('es-ES');
+      await flutertts.setPitch(1);
+      await flutertts.speak(text);
+    } else {
+      setState(() => _isReading = false);
+    }
+  }
 
   void _listen() async {
     if (!_isListening) {
@@ -250,8 +262,23 @@ class _ScreenActividadesState extends State<ScreenActividades> {
           onResult: (val) => setState(() {
             _text = val.recognizedWords;
             print(_text);
-            if(_text.contains('añadir tarea') || _text.contains('Añadir tarea')){
+            if(_text.contains('añadir actividad') || _text.contains('Añadir actividad')){
               modalAddTarea(context);
+            } else if(_text.contains('Eliminar actividad')|| _text.contains('eliminar actividad')){
+              _read('Ok!, dime el título de la actividad que quieres eliminar');
+              eliminar = true;
+            }else if(eliminar && _text.isNotEmpty){
+              print('entro');
+              for(int i=0;i<actividades.length;i++){
+                if(actividades[i].descripcion.toUpperCase()==_text.toUpperCase()){
+                  setState((){
+                    actividades.removeAt(i);
+                    print('Eliminado');
+                    _read('Ok! se eliminó la actividad');
+                  });
+                }
+              }
+              eliminar = false;
             }
             if (val.hasConfidenceRating && val.confidence > 0) {
               _confidence = val.confidence;
