@@ -373,7 +373,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
               try {
                 int min = int.parse(_text);
                 horaAlarma = TimeOfDay(hour: hora, minute: min);
-                var aux = Alarm(fechaAlarma, horaAlarma, descripcionAlarma);
+                var aux = Alarm(cod_alarma: 1, fecha: fechaAlarma,hora: horaAlarma, descripcion: descripcionAlarma);
                 alarms.add(aux);
                 _read('La alarma se guardo adecuadamente');
                 controlador = 7;
@@ -545,7 +545,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                           FlatButton(
                               onPressed: (){
                                 setState(() {
-                                  Alarm aux = Alarm(_myDateTime, _myHourTime, name.text.toString());
+                                  Alarm aux = Alarm(cod_alarma: 1, fecha: _myDateTime, hora: _myHourTime, descripcion: name.text.toString());
                                   alarms.add(aux);
                                   Navigator.of(context).pop();
                                   hour.text = '';

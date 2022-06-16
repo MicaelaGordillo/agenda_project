@@ -1,27 +1,18 @@
 import 'package:flutter/material.dart';
 
 class Alarm {
-  DateTime _fecha;
-  TimeOfDay _hora;
-  String _descripcion;
+  int cod_alarma;
+  DateTime fecha;
+  TimeOfDay hora;
+  String descripcion;
 
-  Alarm(this._fecha, this._hora, this._descripcion);
+  Alarm({required this.cod_alarma, required this.fecha, required this.hora, required this.descripcion});
 
-  String get descripcion => _descripcion;
-
-  set descripcion(String value) {
-    _descripcion = value;
-  }
-
-  TimeOfDay get hora => _hora;
-
-  set hora(TimeOfDay value) {
-    _hora = value;
-  }
-
-  DateTime get fecha => _fecha;
-
-  set fecha(DateTime value) {
-    _fecha = value;
+  Map<String, dynamic> toMap() {
+    return {
+      'fecha': fecha,
+      'hora': hora,
+      'descripcion': descripcion
+    };
   }
 }

@@ -4,6 +4,80 @@ import 'package:intl/intl.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../clases/operation.dart';
+
+class _MyList extends StatefulWidget {
+  const _MyList({Key? key}) : super(key: key);
+
+  @override
+  State<_MyList> createState() => _MyListState();
+}
+
+class _MyListState extends State<_MyList> {
+  List<Color> colores = [Color.fromRGBO(245, 214, 199, 1),Color.fromRGBO(250, 246, 200, 1),Color.fromRGBO(211, 240, 210, 1),Color.fromRGBO(238, 235, 245, 1)];
+  List<Color> coloresText = [Color.fromRGBO(173, 66, 60, 1),Color.fromRGBO(117, 110, 8, 1),Color.fromRGBO(63, 157, 47, 1),Color.fromRGBO(113, 86, 150, 1)];
+  List<Actividad> actividades = [];
+
+  @override
+  void initState(){
+    _loadData();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _loadData();
+    return ListView.builder(
+      itemCount: actividades.length,
+      itemBuilder: (context, index) => Card(
+        color: colores[index%4],
+        margin: const EdgeInsets.only(top:9,right: 10, left: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: ListTile(
+
+          title: Text('${actividades[index].descripcion}', style: TextStyle(fontFamily: 'DidactGothic', color: Color.fromRGBO(56, 56, 56, 1)),),
+          //subtitle: Text('Icream is good for health'),
+          trailing:
+          Row(
+            mainAxisSize: MainAxisSize.min,
+
+            children: [
+              Text('${actividades[index].hora_inicio} - ${actividades[index].hora_final}',style: TextStyle(color: coloresText[index%4], fontFamily: 'DidactGothic')),
+              SizedBox(width: 10)
+              ,CircleAvatar(
+                backgroundColor: Colors.white,
+                radius: 15,
+                child: IconButton(
+                  onPressed: (){
+                    setState(() {
+                      Operation.deleteActividad(actividades[index].cod_actividad);
+                      print("eliminado ${actividades[index].cod_actividad}");
+                    });
+                  },
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.grey,
+                    size: 15,
+                  ),
+                ),
+              ),
+            ],),
+        ),
+      ),
+    );
+  }
+  _loadData () async{
+    List<Actividad> auxActividad = await Operation.actividades();
+    setState((){
+      actividades = auxActividad;
+    });
+  }
+}
+
+
+
 class ScreenActividades extends StatefulWidget {
   List<Actividad> activities;
   ScreenActividades(this.activities);
@@ -13,8 +87,6 @@ class ScreenActividades extends StatefulWidget {
 }
 
 class _ScreenActividadesState extends State<ScreenActividades> {
-  List<Color> colores = [Color.fromRGBO(245, 214, 199, 1),Color.fromRGBO(250, 246, 200, 1),Color.fromRGBO(211, 240, 210, 1),Color.fromRGBO(238, 235, 245, 1)];
-  List<Color> coloresText = [Color.fromRGBO(173, 66, 60, 1),Color.fromRGBO(117, 110, 8, 1),Color.fromRGBO(63, 157, 47, 1),Color.fromRGBO(113, 86, 150, 1)];
   late DateTime _myDateTime;
   late TimeOfDay _myTime;
   bool isChecked = false;
@@ -48,7 +120,8 @@ class _ScreenActividadesState extends State<ScreenActividades> {
 
   @override
   Widget build(BuildContext context) {
-    actividades = widget.activities;
+    //actividades = widget.activities;
+    _loadData();
     frases = frasesClave();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -153,47 +226,7 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: actividades.length,
-                    itemBuilder: (context, index) => Card(
-                      color: colores[index%4],
-                      margin: const EdgeInsets.only(top:9,right: 10, left: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: ListTile(
-                        
-                        title: Text('${actividades[index].descripcion}', style: TextStyle(fontFamily: 'DidactGothic', color: Color.fromRGBO(56, 56, 56, 1)),),
-                        //subtitle: Text('Icream is good for health'),
-                        trailing: 
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-
-                          children: [
-                            Text('${actividades[index].hora_inicio} - ${actividades[index].hora_final}',style: TextStyle(color: coloresText[index%4], fontFamily: 'DidactGothic')),
-                            SizedBox(width: 10)
-                            ,CircleAvatar(
-                              backgroundColor: Colors.white,
-                              radius: 15,
-                              child: IconButton(
-                                onPressed: (){
-                                  setState(() {
-                                    print(index);
-                                    actividades.removeAt(index);
-                                  });
-                                },
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.grey,
-                                  size: 15,
-                                ),
-                              ),
-                            ),
-                          ],),
-                        
-                      ),
-                    ),
-                  ),
+                  child: _MyList()
                 ),
               ],
             ),
@@ -237,6 +270,13 @@ class _ScreenActividadesState extends State<ScreenActividades> {
       ),
     );
   }
+  _loadData () async{
+    List<Actividad> auxActividad = await Operation.actividades();
+    setState((){
+      actividades = auxActividad;
+    });
+  }
+
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _text = '';
@@ -394,7 +434,8 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                   }
                 }
                 var aux = Actividad(cod_actividad: 5, descripcion: descripcionActividad, fecha_inicio: fechaActividad, fecha_final: '00-00-00', hora_inicio: horaInicioActividad, hora_final: horaFinalActividad);
-                actividades.add(aux);
+                Operation.insertActividad(aux);
+                //actividades.add(aux);
                 _read('La actividad se guardo de forma adecuada');
                 controlador = 0;
               } on FormatException {
@@ -408,7 +449,8 @@ class _ScreenActividadesState extends State<ScreenActividades> {
             for(int i=0;i<actividades.length;i++){
               if(actividades[i].descripcion.toUpperCase()==_text.toUpperCase()){
                 setState((){
-                  actividades.removeAt(i);
+                  //actividades.removeAt(i);
+                  Operation.deleteActividad(actividades[i].cod_actividad);
                   f = true;
                   print('Eliminado');
                   _read('Ok! se eliminó la actividad');
@@ -461,7 +503,7 @@ class _ScreenActividadesState extends State<ScreenActividades> {
   modalAddTarea(BuildContext context){
     Widget okButton = TextButton(
         style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(const Color.fromRGBO(189, 211, 135, 1))),
-        onPressed: (){
+        onPressed: () async{
           setState(() {
             Navigator.of(context).pop();
             print(miVar.text);
@@ -473,7 +515,8 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                 hora_inicio: valorHoraInicio.text,
                 hora_final: valorHoraFinal.text,
             );
-            insertActividad(actividad);
+            Operation.insertActividad(actividad);
+            //insertActividad(actividad);
             miVar.text='';
             valorHoraInicio.text = '';
             valorHoraFinal.text = '';
@@ -481,6 +524,7 @@ class _ScreenActividadesState extends State<ScreenActividades> {
             valorFechaInicio.text = '';
 
           });
+          print(await Operation.actividades());
         },child: const Text('OK', style: TextStyle(fontSize: 15, color: Colors.white),)
     );
     Widget cancelButton = TextButton(

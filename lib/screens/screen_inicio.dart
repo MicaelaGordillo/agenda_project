@@ -158,7 +158,7 @@ class _ScreenMainState extends State<ScreenMain> {
                           trailing: Image.asset('assets/check.png', height: 30,),
                         ),
                       ),
-                      ListTile(
+                      /*ListTile(
                         leading: Checkbox(
                           activeColor: const Color.fromRGBO(169, 151, 196, 1),
                           value: tareas[0].terminada,
@@ -193,7 +193,7 @@ class _ScreenMainState extends State<ScreenMain> {
                           },
                         ),
                         title: Text(tareas[1].descripcion, style: const TextStyle(fontFamily: 'DidactGothic')),
-                      ),
+                      ),*/
                       Container(
                         decoration: const BoxDecoration(
                             border: Border(

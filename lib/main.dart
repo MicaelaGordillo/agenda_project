@@ -61,8 +61,8 @@ class _MyAppStfState extends State<MyAppStf> {
   }
 
   void llenarListas(){
-    var tarea1 = Tarea(cod_tarea: 1, descripcion: 'Tarea física', fecha_inicio: '2022-06-03', terminada: false);
-    var tarea2 = Tarea(cod_tarea: 2, descripcion: 'Tarea matemáticas', fecha_inicio: '2022-06-03', terminada: false);
+    var tarea1 = Tarea(cod_tarea: 1, descripcion: 'Tarea física', fecha_inicio: '2022-06-03', terminada: 0);
+    var tarea2 = Tarea(cod_tarea: 2, descripcion: 'Tarea matemáticas', fecha_inicio: '2022-06-03', terminada: 0);
     if(tareas.isEmpty){
       tareas.add(tarea1); tareas.add(tarea2);
     } else {
@@ -77,8 +77,8 @@ class _MyAppStfState extends State<MyAppStf> {
     } else if (actividades.length == 1){
       actividades.add(actividad1);
     }
-    Alarm aux = Alarm(DateTime.now(), TimeOfDay.now(), 'Alarma 1');
-    Alarm aux1 = Alarm(DateTime.now(), TimeOfDay.now(), 'Alarma 2');
+    Alarm aux = Alarm(cod_alarma: 1, fecha: DateTime.now(), hora: TimeOfDay.now(), descripcion: 'Alarma 1');
+    Alarm aux1 = Alarm(cod_alarma: 1, fecha: DateTime.now(), hora:  TimeOfDay.now(), descripcion: 'Alarma 2');
     if(alarms.isEmpty){
       alarms.add(aux); alarms.add(aux1);
     } else if (alarms.length == 1){

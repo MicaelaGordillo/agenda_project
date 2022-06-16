@@ -1,8 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../clases/operation.dart';
 import '../clases/tarea.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
+
+class _MyList extends StatefulWidget {
+  const _MyList({Key? key}) : super(key: key);
+
+  @override
+  State<_MyList> createState() => _MyListState();
+}
+
+class _MyListState extends State<_MyList> {
+  List<Tarea> tareas = [];
+  bool isChecked = false;
+  @override
+  void initState(){
+    _loadData();
+    super.initState();
+  }
+  @override
+
+  Widget build(BuildContext context) {
+    _loadData();
+    return ListView.builder(
+      itemCount: tareas.length,
+      itemBuilder: (context, index) => Card(
+        margin: const EdgeInsets.only(bottom: 2),
+        child: ListTile(
+          leading: Checkbox(
+            activeColor: const Color.fromRGBO(169, 151, 196, 1),
+            value: getBool(tareas[index].terminada),
+            onChanged: (value) {
+              setState(() {
+                print(index);
+                isChecked = value!;
+                int terminada;
+                if(tareas[index].terminada==1){
+                  terminada = 0;
+                }else{
+                  terminada = 1;
+                }
+                var auxTarea = Tarea(cod_tarea: tareas[index].cod_tarea,
+                    descripcion: tareas[index].descripcion,
+                    fecha_inicio: tareas[index].fecha_inicio,
+                    terminada: terminada);
+                Operation.updateTarea(auxTarea);
+                print("cambio $terminada");
+              });
+            },
+          ),
+          title: Text(tareas[index].descripcion, style: TextStyle(fontFamily: 'DidactGothic')),
+          subtitle: Text(tareas[index].fecha_inicio),
+          trailing: CircleAvatar(
+            backgroundColor: const Color.fromRGBO(255, 212, 212, 1),
+            radius: 15,
+            child: IconButton(
+              onPressed: (){
+                setState(() {
+                  Operation.deleteTarea(tareas[index].cod_tarea);
+                  print("Eliminado" + tareas[index].cod_tarea.toString());
+                });
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.white,
+                size: 15,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  _loadData () async{
+    List<Tarea> auxTarea = await Operation.tareas();
+    setState((){
+      tareas = auxTarea;
+    });
+  }
+  bool getBool(int i){
+    bool result = false;
+    if(i==1){
+      result = true;
+    }
+    return result;
+  }
+}
+
 
 class ScreenWork extends StatefulWidget {
   List<Tarea> works;
@@ -44,7 +130,8 @@ class _ScreenWorkState extends State<ScreenWork> {
 
   @override
   Widget build(BuildContext context) {
-    tareas = widget.works;
+    //tareas = widget.works;
+    _loadData();
     frases = frasesClave();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -150,48 +237,7 @@ class _ScreenWorkState extends State<ScreenWork> {
                   ),
                 ),
                 Expanded(
-                    child: ListView.builder(
-                      itemCount: tareas.length,
-                      itemBuilder: (context, index) => Card(
-                        margin: const EdgeInsets.only(bottom: 2),
-                        child: ListTile(
-                          leading: Checkbox(
-                            activeColor: const Color.fromRGBO(169, 151, 196, 1),
-                            value: tareas[index].terminada,
-                            onChanged: (value) {
-                              setState(() {
-                                print(index);
-                                isChecked = value!;
-                                if(tareas[index].terminada){
-                                  tareas[index].terminada = false;
-                                }else{
-                                  tareas[index].terminada = true;
-                                }
-                              });
-                            },
-                          ),
-                          title: Text(tareas[index].descripcion, style: TextStyle(fontFamily: 'DidactGothic')),
-                          subtitle: Text(tareas[index].fecha_inicio),
-                          trailing: CircleAvatar(
-                            backgroundColor: const Color.fromRGBO(255, 212, 212, 1),
-                            radius: 15,
-                            child: IconButton(
-                              onPressed: (){
-                                setState(() {
-                                  print(index);
-                                  tareas.removeAt(index);
-                                });
-                              },
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                                size: 15,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    child: _MyList()
                 ),
               ],
             ),
@@ -235,6 +281,13 @@ class _ScreenWorkState extends State<ScreenWork> {
       ),
     );
   }
+  _loadData () async{
+    List<Tarea> auxTarea = await Operation.tareas();
+    setState((){
+      tareas = auxTarea;
+    });
+  }
+
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _text = '';
@@ -333,8 +386,9 @@ class _ScreenWorkState extends State<ScreenWork> {
                     fechaInicioTarea = '$anio-$mes-$dia';
                   }
                 }
-                var aux = Tarea(cod_tarea: 2, descripcion: descripcionTarea, fecha_inicio: fechaInicioTarea, terminada: false);
-                insertTarea(aux);
+                var aux = Tarea(cod_tarea: 2, descripcion: descripcionTarea, fecha_inicio: fechaInicioTarea, terminada: 0);
+                //insertTarea(aux);
+                Operation.insertTarea(aux);
                 _read('La tarea se guardo de forma adecuada');
                 print(fechaInicioTarea);
                 controlador = 0;
@@ -349,7 +403,8 @@ class _ScreenWorkState extends State<ScreenWork> {
             for(int i=0;i<tareas.length;i++){
               if(tareas[i].descripcion.toUpperCase()==_text.toUpperCase()){
                 setState((){
-                  tareas.removeAt(i);
+                  //tareas.removeAt(i);
+                  Operation.deleteTarea(tareas[i].cod_tarea);
                   f = true;
                   print('Eliminado');
                   _read('Ok! se eliminó la tarea');
@@ -401,7 +456,7 @@ class _ScreenWorkState extends State<ScreenWork> {
   modalAddTarea(BuildContext context){
     Widget okButton = TextButton(
         style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Color.fromRGBO(169, 151, 196, 1))),
-        onPressed: (){
+        onPressed: () async{
           setState(() {
             Navigator.of(context).pop();
             print(miVar.text);
@@ -409,14 +464,14 @@ class _ScreenWorkState extends State<ScreenWork> {
                 cod_tarea: 1,
                 descripcion: miVar.text,
                 fecha_inicio: valorFechaInicio.text,
-                terminada: false
+                terminada: 0
             );
-            insertTarea(tarea);
+            Operation.insertTarea(tarea);
             miVar.text='';
             valorFechaFinal.text = '';
             valorFechaInicio.text = '';
-
           });
+          print(await Operation.tareas());
         },child: const Text('OK', style: TextStyle(fontSize: 15, color: Colors.white),)
     );
     Widget cancelButton = TextButton(
