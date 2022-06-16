@@ -451,7 +451,8 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                   }
                 }
                 var aux = Actividad(cod_actividad: 5, descripcion: descripcionActividad, fecha_realizacion: fechaActividad, hora_inicio: horaInicioActividad, hora_final: horaFinalActividad);
-                actividades.add(aux);
+                //actividades.add(aux);
+                Operation.insertActividad(aux);
                 _read('La actividad se guardo de forma adecuada');
                 controlador = 0;
               } on FormatException {

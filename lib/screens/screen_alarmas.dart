@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:agenda_project/clases/operation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
@@ -71,9 +72,9 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
     Timer miTimer = Timer.periodic(const Duration(seconds: 10),(timer){
       //El codigo se ejecuta cada 30 seg
       for(int i=0;i<alarms.length;i++){
-        print('hola $i');
-        print(TimeOfDay(hour: TimeOfDay.now().hour, minute: TimeOfDay.now().minute).toString());
-        print(DateTime.now().toString());
+        //print('hola $i');
+        //print(TimeOfDay(hour: TimeOfDay.now().hour, minute: TimeOfDay.now().minute).toString());
+        //print(DateTime.now().toString());
         if(alarms[i].hora == TimeOfDay(hour: TimeOfDay.now().hour, minute: TimeOfDay.now().minute) && alarms[i].fecha.day == DateTime.now().day && alarms[i].fecha.month == DateTime.now().month && alarms[i].fecha.year == DateTime.now().year){
           if(!indexEjecutados.contains(i)){
             indexEjecutados.add(i);
@@ -396,6 +397,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                 horaAlarma = TimeOfDay(hour: hora, minute: min);
                 var aux = Alarm(cod_alarma: 1, fecha: fechaAlarma,hora: horaAlarma, descripcion: descripcionAlarma);
                 alarms.add(aux);
+
                 _read('La alarma se guardo adecuadamente');
                 controlador = 0;
               } on FormatException {
