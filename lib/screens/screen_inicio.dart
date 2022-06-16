@@ -1,3 +1,5 @@
+
+import 'package:agenda_project/layout/listaActividadesInicio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../clases/actividad.dart';
@@ -6,6 +8,9 @@ import '../clases/operation.dart';
 import '../clases/tarea.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
+import '../layout/listaAlarmasInicio.dart';
+import '../layout/listaTareasInicio.dart';
+
 
 class ScreenMain extends StatefulWidget {
   List<Tarea> works;
@@ -21,8 +26,8 @@ class _ScreenMainState extends State<ScreenMain> {
   DateTime _myDateTime = DateTime.now();
   List<Tarea> tareas = [];
   List <Alarm> alarms = [];
-  bool isChecked = false;
   List<Actividad> actividades = [];
+  bool isChecked = false;
 
   @override
   void initState() {
@@ -36,13 +41,7 @@ class _ScreenMainState extends State<ScreenMain> {
       tareas = auxTarea;
     });
   }
-  bool getBool(int i){
-    bool result = false;
-    if(i==1){
-      result = true;
-    }
-    return result;
-  }
+
   @override
   Widget build(BuildContext context) {
     //tareas = widget.works;
@@ -178,54 +177,7 @@ class _ScreenMainState extends State<ScreenMain> {
                           trailing: Image.asset('assets/check.png', height: 30,),
                         ),
                       ),
-                      ListTile(
-                        leading: Checkbox(
-                          activeColor: const Color.fromRGBO(169, 151, 196, 1),
-                          value: getBool(tareas[0].terminada),
-                          onChanged: (value) {
-                            setState(() {
-                              isChecked = value!;
-                              int terminada;
-                              if(tareas[0].terminada==1){
-                                terminada = 0;
-                              }else{
-                                terminada = 1;
-                              }
-                              var auxTarea = Tarea(cod_tarea: tareas[0].cod_tarea,
-                                  descripcion: tareas[0].descripcion,
-                                  fecha_inicio: tareas[0].fecha_inicio,
-                                  terminada: terminada);
-                              Operation.updateTarea(auxTarea);
-                              print("cambio $terminada");
-                            });
-                          },
-                        ),
-                        title: Text(tareas[0].descripcion, style: const TextStyle(fontFamily: 'DidactGothic')),
-                      ),
-                      ListTile(
-                        leading: Checkbox(
-                          activeColor: const Color.fromRGBO(169, 151, 196, 1),
-                          value: getBool(tareas[1].terminada),
-                          onChanged: (value) {
-                            setState(() {
-                              isChecked = value!;
-                              int terminada;
-                              if(tareas[1].terminada==1){
-                                terminada = 0;
-                              }else{
-                                terminada = 1;
-                              }
-                              var auxTarea = Tarea(cod_tarea: tareas[1].cod_tarea,
-                                  descripcion: tareas[1].descripcion,
-                                  fecha_inicio: tareas[1].fecha_inicio,
-                                  terminada: terminada);
-                              Operation.updateTarea(auxTarea);
-                              print("cambio $terminada");
-                            });
-                          },
-                        ),
-                        title: Text(tareas[1].descripcion, style: const TextStyle(fontFamily: 'DidactGothic')),
-                      ),
+                      ListTareas(),
                       Container(
                         decoration: const BoxDecoration(
                             border: Border(
@@ -267,30 +219,7 @@ class _ScreenMainState extends State<ScreenMain> {
                           ),
                         ),
                       ),
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        margin: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 10),
-                        elevation: 3,
-                        color: const Color.fromRGBO(245, 214, 199, 1),
-                        child: ListTile(
-                          title: Text(actividades[0].descripcion, style: const TextStyle(color: Colors.black, fontFamily: 'DidactGothic'),),
-                          trailing: Text('${actividades[0].hora_inicio}-${actividades[0].hora_final}',
-                            style: const TextStyle(color: Color.fromRGBO(173, 66, 60, 1), fontFamily: 'Quicksand',),
-                          ),
-                        ),
-                      ),
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        margin: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 10),
-                        elevation: 3,
-                        color: const Color.fromRGBO(250, 246, 200, 1),
-                        child: ListTile(
-                          title: Text(actividades[1].descripcion, style: const TextStyle(color: Colors.black, fontFamily: 'DidactGothic'),),
-                          trailing: Text('${actividades[1].hora_inicio}-${actividades[1].hora_final}',
-                            style: const TextStyle(color: Color.fromRGBO(117, 110, 8, 1), fontFamily: 'Quicksand',),
-                          ),
-                        ),
-                      ),
+                      ListaActividades(),
                       RaisedButton(
                         color: Colors.white,
                         child: const ListTile(
@@ -315,28 +244,7 @@ class _ScreenMainState extends State<ScreenMain> {
                         ),
                         trailing: Image.asset('assets/calendario.png', height: 40,),
                       ),
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        margin: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 10),
-                        elevation: 3,
-                        color: const Color.fromRGBO(255, 237, 237, 1),
-                        child: ListTile(
-                          leading: Image.asset('assets/reloj.png', height: 35),
-                          title: Text('${alarms[0].descripcion} ', style: const TextStyle(color: Color.fromRGBO(173, 66, 60, 1), fontFamily: 'DidactGothic'),),
-                          subtitle: Text('${DateFormat('dd-MM-yyyy').format(alarms[0].fecha)} ${alarms[0].hora.hour}:${alarms[0].hora.minute}', style: const TextStyle(color: Color.fromRGBO(113, 113, 113, 1)),),
-                        ),
-                      ),
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        margin: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 10),
-                        elevation: 3,
-                        color: const Color.fromRGBO(255, 240, 227, 1),
-                        child: ListTile(
-                          leading: Image.asset('assets/reloj.png', height: 35),
-                          title: Text('${alarms[1].descripcion} ', style: const TextStyle(color: Color.fromRGBO(245, 164, 77, 1), fontFamily: 'DidactGothic'),),
-                          subtitle: Text('${DateFormat('dd-MM-yyyy').format(alarms[1].fecha)} ${alarms[1].hora.hour}:${alarms[1].hora.minute}', style: const TextStyle(color: Color.fromRGBO(113, 113, 113, 1)),),
-                        ),
-                      ),
+                      ListaAlarmas(),
                       const ListTile(
                         trailing: Text('Ver más',
                           style: TextStyle(color: Colors.blue, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Quicksand',),
@@ -443,6 +351,7 @@ class _ScreenMainState extends State<ScreenMain> {
 
 }
 
+//Circulos decorativos
 class BluePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -468,3 +377,5 @@ class BluePainter extends CustomPainter {
     return oldDelegate != this;
   }
 }
+
+

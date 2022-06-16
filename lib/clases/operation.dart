@@ -27,7 +27,7 @@ class Operation{
   //Mostrar tarea
   static Future<List<Tarea>> tareas() async {
     Database db = await _openDB();
-    final List<Map<String, dynamic>> maps = await db.query('tarea');
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM tarea ORDER BY fecha_inicio ASC");;
     return List.generate(maps.length, (i) {
       return Tarea(
         cod_tarea: maps[i]['cod_tarea'],
@@ -68,7 +68,7 @@ class Operation{
   //Mostrar actividad
   static Future<List<Actividad>> actividades() async {
     Database db = await _openDB();
-    final List<Map<String, dynamic>> maps = await db.query('actividad');
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM actividad ORDER BY fecha_realizacion ASC");
     return List.generate(maps.length, (i) {
       return Actividad(
           cod_actividad: maps[i]['cod_actividad'],
@@ -102,7 +102,7 @@ class Operation{
   //Mostrar dos tareas
   static Future<List<Tarea>> tareas2() async {
     Database db = await _openDB();
-    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM tarea ORDER BY fecha_inicio DESC LIMIT 2");
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM tarea ORDER BY fecha_inicio ASC LIMIT 2");
     return List.generate(maps.length, (i) {
       return Tarea(
           cod_tarea: maps[i]['cod_tarea'],
@@ -115,7 +115,7 @@ class Operation{
   //Mostrar dos actividades
   static Future<List<Actividad>> actividades2() async {
     Database db = await _openDB();
-    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM actividad ORDER BY fecha_realizacion DESC LIMIT 2");
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM actividad ORDER BY fecha_realizacion ASC LIMIT 2");
     return List.generate(maps.length, (i) {
       return Actividad(
           cod_actividad: maps[i]['cod_actividad'],
@@ -123,6 +123,19 @@ class Operation{
           fecha_realizacion: maps[i]['fecha_realizacion'],
           hora_inicio: maps[i]['hora_inicio'],
           hora_final: maps[i]['hora_final']
+      );
+    });
+  }
+  //Mostrar dos alarmas
+  static Future<List<AlarmaBD>> alarmas2() async {
+    Database db = await _openDB();
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM alarma ORDER BY fecha ASC LIMIT 2");
+    return List.generate(maps.length, (i) {
+      return AlarmaBD(
+          cod_alarma: maps[i]['cod_alarma'],
+          fecha: maps[i]['fecha'],
+          hora: maps[i]['hora'],
+          descripcion: maps[i]['descripcion']
       );
     });
   }
@@ -137,7 +150,7 @@ class Operation{
   //Mostrar alarma
   static Future<List<AlarmaBD>> alarmas() async {
     Database db = await _openDB();
-    final List<Map<String, dynamic>> maps = await db.query('alarma');
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM alarma ORDER BY fecha ASC");
     return List.generate(maps.length, (i) {
       return AlarmaBD(
           cod_alarma: maps[i]['cod_alarma'],

@@ -392,15 +392,15 @@ class _ScreenWorkState extends State<ScreenWork> {
                   int mes = comprobarMes(splitter[2]);
                   if(dia<10){
                     if(mes<10){
-                      fechaInicioTarea = '$anio-0$mes-0$dia';
+                      fechaInicioTarea = '0$dia-0$mes-$anio';
                     } else {
-                      fechaInicioTarea = '$anio-$mes-0$dia';
+                      fechaInicioTarea = '0$dia-$mes-$anio';
                     }
                   } else {
                     if(mes<10){
-                      fechaInicioTarea = '$anio-0$mes-$dia';
+                      fechaInicioTarea = '$dia-0$mes-$anio';
                     } else {
-                      fechaInicioTarea = '$anio-$mes-$dia';
+                      fechaInicioTarea = '$dia-$mes-$anio';
                     }
                   }
                   var aux = Tarea(cod_tarea: 2, descripcion: descripcionTarea, fecha_inicio: fechaInicioTarea, terminada: 0);
