@@ -26,16 +26,6 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   TextEditingController name = TextEditingController();
   DateTime _myDateTime = DateTime.now();
   TimeOfDay _myHourTime = TimeOfDay.now();
-  List<String> keys = [];
-
-  List<String> frasesClave (){
-    List<String> aux = [];
-    aux.add('ABRIR MENU te permite abrir el modal para agregar una nueva alarma');
-    aux.add('AÑADIR ALARMA te permite agregar una nueva alarma utilizando la asistente por voz');
-    aux.add('ELIMINAR ALARMA te permite eliminar una alarma utilizando la asistente por voz');
-    aux.add('CANCELAR te permite cancelar cualquier proceso en cualquier instante');
-    return aux;
-  }
 
   int getColor(){
     if(_colorSelected == 5){
@@ -78,7 +68,6 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   @override
   Widget build(BuildContext context) {
     alarms = widget.alarmas;
-    keys = frasesClave();
     Timer miTimer = Timer.periodic(const Duration(seconds: 10),(timer){
       //El codigo se ejecuta cada 30 seg
       for(int i=0;i<alarms.length;i++){
@@ -105,7 +94,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
             child: Column(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top:45),
+                  margin: const EdgeInsets.only(top:25),
                   padding: const EdgeInsets.all(20),
                   width: double.infinity,//Toma el largo horizontal
                   //color: Colors.grey[100], //Color de fondo
@@ -132,16 +121,56 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: keys.length,
-                    itemBuilder: (context, index) => Card(
-                      margin: const EdgeInsets.only(bottom: 2),
-                      color: Colors.grey[100],
-                      child: ListTile(
-                        title: Text(keys[index]),
-                      ),
-                    ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('ABRIR MENU'),
+                    subtitle: Text('Esta frase te permitirá abrir el modal para agregar una nueva alarma.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('AÑADIR ALARMA'),
+                    subtitle: Text('Esta frase te permite agregar una nueva alarma utilizando la asistente por voz.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('ELIMINAR ALARMA'),
+                    subtitle: Text('Esta frase te permite eliminar una alarma utilizando la asistente por voz.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('CANCELAR'),
+                    subtitle: Text('Esta frase te permite cancelar cualquier proceso en cualquier momento.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('LEER ALARMAS'),
+                    subtitle: Text('Esta frase activa el asistente por voz y hace que te lo lea tus alarmas.'),
                   ),
                 ),
               ],
@@ -276,7 +305,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   bool eliminar = true;
   int controlador = 0;
   String descripcionAlarma = '';
-  int dia = -1, mes = -1, hora = -1;
+  int hora = -1;
   late DateTime fechaAlarma;
   late TimeOfDay horaAlarma;
 
@@ -332,40 +361,32 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                 _read('Ocurrio un error puede repetir la orden por favor');
               }
             } else if (controlador==1){
-              _read('Indique el día en el que se mandará la alarma');
+              _read('Indique la fecha en la que se mandará la alarma. Ejemplo: 3 de Junio del 2022');
               descripcionAlarma = _text;
               print('Descripcion: '+descripcionAlarma);
               controlador = 2;
             } else if (controlador==2){
               try {
-                dia = int.parse(_text);
-                _read('Indique el mes en el que se mandará la alarma');
-                controlador = 3;
+                final splitter = _text.split(' ');
+                print(splitter);
+                _read('Indique solo la hora cuando se le debe mandar la alarma');
+                int dia = int.parse(splitter[0]);
+                int anio = int.parse(splitter[4]);
+                if(comprobarMes(splitter[2])>0){
+                  int mes = comprobarMes(splitter[2]);
+                  fechaAlarma = DateTime.utc(anio, mes, dia);
+                  controlador = 3;
+                } else {
+                  _read("Ocurrio un error al comprobar el mes, intente de nuevo");
+                }
               } on FormatException {
-                _read("No es un día, por favor intente de nuevo");
+                _read("Ocurrio un error al comprobar el día o el año, por favor intente de nuevo");
               }
-            } else if (controlador==3){
-              if (comprobarMes(_text)>0) {
-                mes = comprobarMes(_text);
-                _read('Indique el año en el que se mandará la alarma');
-                controlador = 4;
-              } else {
-                _read("No es un mes, por favor intente de nuevo");
-              }
-            } else if (controlador==4){
-              try {
-                int anio = int.parse(_text);
-                fechaAlarma = DateTime.utc(anio, mes, dia);
-                _read("Indique solo la hora cuando se le debe mandar la alarma");
-                controlador = 5;
-              } on FormatException {
-                _read("No es un año, por favor intente de nuevo");
-              }
-            } else if (controlador==5) {
+            } else if (controlador==3) {
               try {
                 hora = int.parse(_text);
                 _read('Indique solo los minutos cuando se le debe mandar la alarma');
-                controlador = 6;
+                controlador = 4;
               } on FormatException {
                 _read("No es una hora, por favor intente de nuevo");
               }
@@ -376,7 +397,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                 var aux = Alarm(fechaAlarma, horaAlarma, descripcionAlarma);
                 alarms.add(aux);
                 _read('La alarma se guardo adecuadamente');
-                controlador = 7;
+                controlador = 0;
               } on FormatException {
                 _read("No son minutos, por favor intente de nuevo");
               }

@@ -15,20 +15,10 @@ class ScreenWork extends StatefulWidget {
 class _ScreenWorkState extends State<ScreenWork> {
   bool isChecked = false;
   List<Tarea> tareas = [];
-  List<String> frases = [];
   late DateTime _myDateTime;
   TextEditingController miVar = TextEditingController();
   TextEditingController valorFechaInicio = TextEditingController();
   TextEditingController valorFechaFinal = TextEditingController();
-
-  List<String> frasesClave (){
-    List<String> aux = [];
-    aux.add('ABRIR MENU te permite abrir el modal para agregar una nueva tarea');
-    aux.add('AÑADIR TAREA te permite agregar una nueva tarea utilizando la asistente por voz');
-    aux.add('ELIMINAR TAREA te permite eliminar una tarea utilizando la asistente por voz');
-    aux.add('CANCELAR te permite cancelar cualquier proceso en cualquier instante');
-    return aux;
-  }
 
   @override
   void initState() {
@@ -45,7 +35,6 @@ class _ScreenWorkState extends State<ScreenWork> {
   @override
   Widget build(BuildContext context) {
     tareas = widget.works;
-    frases = frasesClave();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
@@ -58,7 +47,7 @@ class _ScreenWorkState extends State<ScreenWork> {
             child: Column(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top:45),
+                  margin: const EdgeInsets.only(top:25),
                   padding: const EdgeInsets.all(20),
                   width: double.infinity,//Toma el largo horizontal
                   //color: Colors.grey[100], //Color de fondo
@@ -85,17 +74,57 @@ class _ScreenWorkState extends State<ScreenWork> {
                     ],
                   ),
                 ),
-                Expanded(
-                    child: ListView.builder(
-                      itemCount: frases.length,
-                      itemBuilder: (context, index) => Card(
-                        margin: const EdgeInsets.only(bottom: 2),
-                        color: Colors.grey[100],
-                        child: ListTile(
-                          title: Text(frases[index]),
-                        ),
-                      ),
-                    ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('ABRIR MENU'),
+                    subtitle: Text('Esta frase te permitirá abrir el modal para agregar una nueva tarea.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('AÑADIR TAREA'),
+                    subtitle: Text('Esta frase te permite agregar una nueva tarea utilizando la asistente por voz.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('ELIMINAR TAREA'),
+                    subtitle: Text('Esta frase te permite eliminar una tarea utilizando la asistente por voz.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('CANCELAR'),
+                    subtitle: Text('Esta frase te permite cancelar cualquier proceso en cualquier momento.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('LEER TAREAS'),
+                    subtitle: Text('Esta frase activa el asistente por voz y hace que te lo lea tus tareas.'),
+                  ),
                 ),
               ],
             ),
@@ -242,8 +271,6 @@ class _ScreenWorkState extends State<ScreenWork> {
   bool eliminar = true;
   int controlador = 0;
   String descripcionTarea = '';
-  int dia = -1;
-  int mes = -1;
   String fechaInicioTarea = '';
 
   void _read (String text) async{
@@ -251,6 +278,7 @@ class _ScreenWorkState extends State<ScreenWork> {
     await flutertts.setPitch(1);
     await flutertts.speak(text);
   }
+
   void _listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize(
@@ -297,49 +325,41 @@ class _ScreenWorkState extends State<ScreenWork> {
                 _read('Ocurrio un error puede repetir la orden por favor');
               }
             } else if (controlador==1){
-              _read('Indique el día en el que se realizará la tarea');
+              _read('Indique la fecha en la que se realizará la tarea. Ejemplo: 3 de Junio del 2022');
               descripcionTarea = _text;
               print('Descripcion: '+descripcionTarea);
               controlador = 2;
-            } else if (controlador==2){
-              try {
-                dia = int.parse(_text);
-                _read('Indique el mes en el que se realizará la tarea');
-                controlador = 3;
-              } on FormatException {
-                _read("No es un día, por favor intente de nuevo");
-              }
-            } else if (controlador==3){
-              if (comprobarMes(_text)>0) {
-                mes = comprobarMes(_text);
-                _read('Indique el año en el que se realizará la tarea');
-                controlador = 4;
-              } else {
-                _read("No es un mes, por favor intente de nuevo");
-              }
             } else {
               try {
-                int anio = int.parse(_text);
-                if(dia<10){
-                  if(mes<10){
-                    fechaInicioTarea = '$anio-0$mes-0$dia';
+                final splitter = _text.split(' ');
+                print(splitter);
+                _read('Indique el mes en el que se realizará la tarea');
+                int dia = int.parse(splitter[0]);
+                int anio = int.parse(splitter[4]);
+                if(comprobarMes(splitter[2])>0){
+                  int mes = comprobarMes(splitter[2]);
+                  if(dia<10){
+                    if(mes<10){
+                      fechaInicioTarea = '$anio-0$mes-0$dia';
+                    } else {
+                      fechaInicioTarea = '$anio-$mes-0$dia';
+                    }
                   } else {
-                    fechaInicioTarea = '$anio-$mes-0$dia';
+                    if(mes<10){
+                      fechaInicioTarea = '$anio-0$mes-$dia';
+                    } else {
+                      fechaInicioTarea = '$anio-$mes-$dia';
+                    }
                   }
+                  var aux = Tarea(cod_tarea: 2, descripcion: descripcionTarea, fecha_inicio: fechaInicioTarea, terminada: false);
+                  insertTarea(aux);
+                  _read('La tarea se guardo de forma adecuada');
+                  controlador = 0;
                 } else {
-                  if(mes<10){
-                    fechaInicioTarea = '$anio-0$mes-$dia';
-                  } else {
-                    fechaInicioTarea = '$anio-$mes-$dia';
-                  }
+                  _read("Ocurrio un error al comprobar el mes, intente de nuevo");
                 }
-                var aux = Tarea(cod_tarea: 2, descripcion: descripcionTarea, fecha_inicio: fechaInicioTarea, terminada: false);
-                insertTarea(aux);
-                _read('La tarea se guardo de forma adecuada');
-                print(fechaInicioTarea);
-                controlador = 0;
               } on FormatException {
-                _read("No es un año, por favor intente de nuevo");
+                _read("Ocurrio un error al comprobar el día o el año, por favor intente de nuevo");
               }
             }
             _text = '';

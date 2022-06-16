@@ -1,9 +1,10 @@
-import 'package:agenda_project/screens/screen_alarmas.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../clases/actividad.dart';
 import '../clases/alarm.dart';
 import '../clases/tarea.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ScreenMain extends StatefulWidget {
   List<Tarea> works;
@@ -16,18 +17,16 @@ class ScreenMain extends StatefulWidget {
 }
 
 class _ScreenMainState extends State<ScreenMain> {
-  int _selectedIndex = 0;
-  final keys = List<String>.generate(20, (i) => "Frase $i");
   DateTime _myDateTime = DateTime.now();
   List<Tarea> tareas = [];
   List <Alarm> alarms = [];
   bool isChecked = false;
   List<Actividad> actividades = [];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
   }
 
   @override
@@ -73,17 +72,23 @@ class _ScreenMainState extends State<ScreenMain> {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: keys.length,
-                    itemBuilder: (context, index) => Card(
-                      margin: const EdgeInsets.only(bottom: 2),
-                      color: Colors.grey[100],
-                      child: ListTile(
-                        title: Text(keys[index]),
-                        subtitle: const Text('Icream is good for health'),
-                      ),
-                    ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('QUÉ DÍA ES HOY'),
+                    subtitle: Text('Esta frase te permitirá activar a la asistente por voz y te dirá el día en que te encuentras.'),
+                  ),
+                ),
+                const SizedBox(   //Espacio entre textos
+                  height: 5,
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  color: Colors.grey[100],
+                  child: const ListTile(
+                    title: Text('QUÉ FECHA ES HOY'),
+                    subtitle: Text('Esta frase te permitirá activar a la asistente por voz y te dirá la fecha en la que te encuentras.'),
                   ),
                 ),
               ],
@@ -329,8 +334,7 @@ class _ScreenMainState extends State<ScreenMain> {
                 child: FloatingActionButton(
                   child: const Icon(Icons.mic, size: 30,color: Color.fromRGBO(67, 157, 187, 1),),
                   backgroundColor: const Color.fromRGBO(216, 237, 243, 1),
-                  onPressed: (){
-                  },
+                  onPressed: _listen,
                 ),
               ),
             ),
@@ -338,6 +342,50 @@ class _ScreenMainState extends State<ScreenMain> {
         ),
       ),
     );
+  }
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = '';
+  FlutterTts flutertts = FlutterTts();
+
+  void _read (String text) async{
+    await flutertts.setLanguage('es-ES');
+    await flutertts.setPitch(1);
+    await flutertts.speak(text);
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() async {
+            _text = val.recognizedWords;
+            print(_text);
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+      if(_text.isEmpty){
+        _read('No se le escuchó, puede repetir por favor');
+      } else {
+        if(_text.contains('Qué día es hoy') || _text.contains('qué día es hoy')){
+          _read('Hoy es '+dayWeekend(_myDateTime.weekday));
+        } else if (_text.contains('Qué fecha es hoy') || _text.contains('qué fecha es hoy')){
+          _read('La fecha de hoy es '+DateFormat('dd-MM-yyyy').format(_myDateTime));
+        } else {
+          _read('Ocurrio un error puede repetir la orden por favor');
+        }
+      }
+      _text = '';
+    }
   }
 
   String dayWeekend(int n){
