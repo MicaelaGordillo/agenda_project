@@ -1,11 +1,8 @@
 import 'package:agenda_project/clases/actividad.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../clases/tarea.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:avatar_glow/avatar_glow.dart';
-import 'package:highlight_text/highlight_text.dart';
 
 class ScreenActividades extends StatefulWidget {
   List<Actividad> activities;
@@ -20,16 +17,23 @@ class _ScreenActividadesState extends State<ScreenActividades> {
   List<Color> coloresText = [Color.fromRGBO(173, 66, 60, 1),Color.fromRGBO(117, 110, 8, 1),Color.fromRGBO(63, 157, 47, 1),Color.fromRGBO(113, 86, 150, 1)];
   late DateTime _myDateTime;
   late TimeOfDay _myTime;
-  int _selectedIndex = 0;
   bool isChecked = false;
-  //final tareas = List<String>.generate(100, (i) => "Tarea $i");
   List<Actividad> actividades = [];
-  final frases = List<String>.generate(20, (i) => "Frase $i");
+  List<String> frases = [];
   TextEditingController miVar = TextEditingController();
   TextEditingController valorHoraInicio = TextEditingController();
   TextEditingController valorHoraFinal = TextEditingController();
   TextEditingController valorFechaInicio = TextEditingController();
   TextEditingController valorFechaFinal = TextEditingController();
+
+  List<String> frasesClave (){
+    List<String> aux = [];
+    aux.add('ABRIR MENU te permite abrir el modal para agregar una nueva actividad');
+    aux.add('AÑADIR ACTIVIDAD te permite agregar una nueva actividad utilizando la asistente por voz');
+    aux.add('ELIMINAR ACTIVIDAD te permite eliminar una actividad utilizando la asistente por voz');
+    aux.add('CANCELAR te permite cancelar cualquier proceso en cualquier instante');
+    return aux;
+  }
 
   @override
   void initState() {
@@ -42,15 +46,10 @@ class _ScreenActividadesState extends State<ScreenActividades> {
     print('se agregó la actividad');
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     actividades = widget.activities;
+    frases = frasesClave();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
@@ -61,7 +60,7 @@ class _ScreenActividadesState extends State<ScreenActividades> {
             child: Column(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top:20, bottom: 0),
+                  margin: const EdgeInsets.only(top:45),
                   padding: const EdgeInsets.all(20),
                   width: double.infinity,//Toma el largo horizontal
                   //color: Colors.grey[100], //Color de fondo
@@ -78,6 +77,13 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                         'Estas son las frases que puedes utilizar para realizar acciones en la aplicación sin necesidad de escribir :)',
                         style: TextStyle(fontSize: 15),
                       ),
+                      SizedBox(   //Espacio entre textos
+                        height: 10,
+                      ),
+                      Text(
+                        'No olvides que después de activar alguna opción debes seguir las instrucciones de la asistente por voz.',
+                        style: TextStyle(fontSize: 15),
+                      ),
                     ],
                   ),
                 ),
@@ -89,7 +95,6 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                       color: Colors.grey[100],
                       child: ListTile(
                         title: Text('${frases[index]}'),
-                        subtitle: Text('Icream is good for health'),
                       ),
                     ),
                   ),
@@ -218,7 +223,7 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                 width: 40,
                 child: FloatingActionButton(
                   child: const Icon(Icons.add, size: 30, color: Color.fromRGBO(189, 211, 135, 1),),
-                  backgroundColor: Color.fromRGBO(233, 240, 215, 1),
+                  backgroundColor: const Color.fromRGBO(233, 240, 215, 1),
                   onPressed: (){
                     modalAddTarea(context);
                   },
@@ -234,20 +239,18 @@ class _ScreenActividadesState extends State<ScreenActividades> {
   }
   late stt.SpeechToText _speech;
   bool _isListening = false;
-  String _text = 'Presiona el botón y empieza a hablar';
-  double _confidence = 1.0;
-  bool _isReading = false;
+  String _text = '';
   FlutterTts flutertts = FlutterTts();
-  bool eliminar = false;
+  bool eliminar = true;
+  int controlador = 0;
+  String descripcionActividad = '';
+  int dia = -1, mes = -1, hora1 = -1, hora2 = -1;
+  String fechaActividad = '', horaInicioActividad = '', horaFinalActividad = '';
+
   void _read (String text) async{
-    if (!_isReading) {
-      setState(() => _isReading = true);
-      await flutertts.setLanguage('es-ES');
-      await flutertts.setPitch(1);
-      await flutertts.speak(text);
-    } else {
-      setState(() => _isReading = false);
-    }
+    await flutertts.setLanguage('es-ES');
+    await flutertts.setPitch(1);
+    await flutertts.speak(text);
   }
 
   void _listen() async {
@@ -262,26 +265,8 @@ class _ScreenActividadesState extends State<ScreenActividades> {
           onResult: (val) => setState(() {
             _text = val.recognizedWords;
             print(_text);
-            if(_text.contains('añadir actividad') || _text.contains('Añadir actividad')){
+            if(_text.contains('Abrir menú') || _text.contains('abrir menú')){
               modalAddTarea(context);
-            } else if(_text.contains('Eliminar actividad')|| _text.contains('eliminar actividad')){
-              _read('Ok!, dime el título de la actividad que quieres eliminar');
-              eliminar = true;
-            }else if(eliminar && _text.isNotEmpty){
-              print('entro');
-              for(int i=0;i<actividades.length;i++){
-                if(actividades[i].descripcion.toUpperCase()==_text.toUpperCase()){
-                  setState((){
-                    actividades.removeAt(i);
-                    print('Eliminado');
-                    _read('Ok! se eliminó la actividad');
-                  });
-                }
-              }
-              eliminar = false;
-            }
-            if (val.hasConfidenceRating && val.confidence > 0) {
-              _confidence = val.confidence;
             }
           }),
         );
@@ -289,12 +274,193 @@ class _ScreenActividadesState extends State<ScreenActividades> {
     } else {
       setState(() => _isListening = false);
       _speech.stop();
+      print(_text);
+      print(controlador);
+      if(_text.isEmpty){
+        _read('No se le escuchó, puede repetir por favor');
+      } else {
+        if (_text.contains('cancelar') || _text.contains('Cancelar')){
+          _read('Proceso cancelado');
+          controlador = 0;
+          eliminar = true;
+          _text = '';
+        } else if(_text.contains('Eliminar actividad')|| _text.contains('eliminar actividad')){
+          _read('Ok!, dime el título de la actividad que quieres eliminar');
+          eliminar = false;
+          controlador = 0;
+          _text = '';
+        } else {
+          if (eliminar) {
+            if(controlador==0){
+              if(_text.contains('añadir actividad') || _text.contains('Añadir actividad')){
+                _read('Hola!, por favor dime la descripción de la actividad que quieres añadir');
+                controlador = 1;
+              } else {
+                _read('Ocurrio un error puede repetir la orden por favor');
+              }
+            } else if (controlador==1){
+              _read('Indique el día en el que se realizará la actividad');
+              descripcionActividad = _text;
+              print('Descripcion: '+descripcionActividad);
+              controlador = 2;
+            } else if (controlador==2){
+              try {
+                dia = int.parse(_text);
+                _read('Indique el mes en el que se realizará la actividad');
+                controlador = 3;
+              } on FormatException {
+                _read("No es un día, por favor intente de nuevo");
+              }
+            } else if (controlador==3){
+              if (comprobarMes(_text)>0) {
+                mes = comprobarMes(_text);
+                _read('Indique el año en el que se realizará la actividad');
+                controlador = 4;
+              } else {
+                _read("No es un mes, por favor intente de nuevo");
+              }
+            } else if (controlador==4){
+              try {
+                int anio = int.parse(_text);
+                if(dia<10){
+                  if(mes<10){
+                    fechaActividad = '$anio-0$mes-0$dia';
+                  } else {
+                    fechaActividad = '$anio-$mes-0$dia';
+                  }
+                } else {
+                  if(mes<10){
+                    fechaActividad = '$anio-0$mes-$dia';
+                  } else {
+                    fechaActividad = '$anio-$mes-$dia';
+                  }
+                }
+                _read("Indique solo la hora de inicio de la actividad");
+                controlador = 5;
+              } on FormatException {
+                _read("No es un año, por favor intente de nuevo");
+              }
+            } else if (controlador==5) {
+              try {
+                hora1 = int.parse(_text);
+                _read('Indique solo los minutos de inicio de la actividad');
+                controlador = 6;
+              } on FormatException {
+                _read("No es una hora, por favor intente de nuevo");
+              }
+            } else if (controlador==6) {
+              try {
+                int min1 = int.parse(_text);
+                if(hora1<10){
+                  if(min1<10){
+                    horaInicioActividad = '0$hora1:0$min1';
+                  } else {
+                    horaInicioActividad = '0$hora1:$min1';
+                  }
+                } else {
+                  if(min1<10){
+                    horaInicioActividad = '$hora1:0$min1';
+                  } else {
+                    horaInicioActividad = '$hora1:$min1';
+                  }
+                }
+                _read('Indique solo la hora final de la actividad');
+                controlador = 7;
+              } on FormatException {
+                _read("No son minutos, por favor intente de nuevo");
+              }
+            } else if (controlador==7) {
+              try {
+                hora2 = int.parse(_text);
+                _read('Indique solo los minutos del final de la actividad');
+                controlador = 8;
+              } on FormatException {
+                _read("No es una hora, por favor intente de nuevo");
+              }
+            } else if (controlador==8) {
+              try {
+                int min2 = int.parse(_text);
+                if(hora2<10){
+                  if(min2<10){
+                    horaFinalActividad = '0$hora2:0$min2';
+                  } else {
+                    horaFinalActividad = '0$hora2:$min2';
+                  }
+                } else {
+                  if(min2<10){
+                    horaFinalActividad = '$hora2:0$min2';
+                  } else {
+                    horaFinalActividad = '$hora2:$min2';
+                  }
+                }
+                var aux = Actividad(cod_actividad: 5, descripcion: descripcionActividad, fecha_inicio: fechaActividad, fecha_final: '00-00-00', hora_inicio: horaInicioActividad, hora_final: horaFinalActividad);
+                actividades.add(aux);
+                _read('La actividad se guardo de forma adecuada');
+                controlador = 0;
+              } on FormatException {
+                _read("No son minutos, por favor intente de nuevo");
+              }
+            }
+            _text = '';
+          } else {
+            bool f = false;
+            print('entro');
+            for(int i=0;i<actividades.length;i++){
+              if(actividades[i].descripcion.toUpperCase()==_text.toUpperCase()){
+                setState((){
+                  actividades.removeAt(i);
+                  f = true;
+                  print('Eliminado');
+                  _read('Ok! se eliminó la actividad');
+                });
+              }
+            }
+            if (f){
+              eliminar = true;
+              _text = '';
+            } else {
+              _read('Actividad no encontrada intente de nuevo');
+            }
+          }
+        }
+      }
     }
+  }
+
+  int comprobarMes(String mes){
+    int flag = -1;
+    switch(mes){
+      case 'Enero': flag = 1; break;
+      case 'enero': flag = 1; break;
+      case 'Febrero': flag = 2; break;
+      case 'febrero': flag = 2; break;
+      case 'Marzo': flag = 3; break;
+      case 'marzo': flag = 3; break;
+      case 'Abril': flag = 4; break;
+      case 'abril': flag = 4; break;
+      case 'Mayo': flag = 5; break;
+      case 'mayo': flag = 5; break;
+      case 'Junio': flag = 6; break;
+      case 'junio': flag = 6; break;
+      case 'Julio': flag = 7; break;
+      case 'julio': flag = 7; break;
+      case 'Agosto': flag = 8; break;
+      case 'agosto': flag = 8; break;
+      case 'Septiembre': flag = 9; break;
+      case 'septiembre': flag = 9; break;
+      case 'Octubre': flag = 10; break;
+      case 'octubre': flag = 10; break;
+      case 'Noviembre': flag = 11; break;
+      case 'noviembre': flag = 11; break;
+      case 'Diciembre': flag = 12; break;
+      case 'diciembre': flag = 12; break;
+    }
+    return flag;
   }
 
   modalAddTarea(BuildContext context){
     Widget okButton = TextButton(
-        style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Color.fromRGBO(189, 211, 135, 1))),
+        style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(const Color.fromRGBO(189, 211, 135, 1))),
         onPressed: (){
           setState(() {
             Navigator.of(context).pop();

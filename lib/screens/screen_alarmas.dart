@@ -5,8 +5,6 @@ import 'package:intl/intl.dart';
 import '../clases/alarm.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:avatar_glow/avatar_glow.dart';
-import 'package:highlight_text/highlight_text.dart';
 
 class ScreenAlarm extends StatefulWidget {
   List <Alarm> alarmas;
@@ -19,22 +17,24 @@ class ScreenAlarm extends StatefulWidget {
 class _ScreenAlarmState extends State<ScreenAlarm> {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   List<int> indexEjecutados = [];
-  int _selectedIndex = 0;
   int _colorSelected = -1;
   List <Alarm> alarms = [];
   List <Color> colorBack = [const Color.fromRGBO(255, 237, 237, 1), const Color.fromRGBO(255, 240, 227, 1), const Color.fromRGBO(252, 249, 221, 1), const Color.fromRGBO(241, 250, 240, 1), const Color.fromRGBO(230, 247, 250, 1), const Color.fromRGBO(240, 237, 247, 1)];
   List <Color> colorLetter = [const Color.fromRGBO(173, 66, 60, 1), const Color.fromRGBO(245, 164, 77, 1), const Color.fromRGBO(179, 168, 16, 1), const Color.fromRGBO(143, 174, 45, 1), const Color.fromRGBO(67, 157, 187, 1), const Color.fromRGBO(113, 86, 150, 1)];
-  final keys = List<String>.generate(20, (i) => "Frase $i");
   TextEditingController date = TextEditingController();
   TextEditingController hour = TextEditingController();
   TextEditingController name = TextEditingController();
   DateTime _myDateTime = DateTime.now();
   TimeOfDay _myHourTime = TimeOfDay.now();
+  List<String> keys = [];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  List<String> frasesClave (){
+    List<String> aux = [];
+    aux.add('ABRIR MENU te permite abrir el modal para agregar una nueva alarma');
+    aux.add('AÑADIR ALARMA te permite agregar una nueva alarma utilizando la asistente por voz');
+    aux.add('ELIMINAR ALARMA te permite eliminar una alarma utilizando la asistente por voz');
+    aux.add('CANCELAR te permite cancelar cualquier proceso en cualquier instante');
+    return aux;
   }
 
   int getColor(){
@@ -49,10 +49,10 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   void initState(){
     super.initState();
     _speech = stt.SpeechToText();
-    var initializationSettingsAndroid = new AndroidInitializationSettings('panda');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    flutterLocalNotificationsPlugin =  new FlutterLocalNotificationsPlugin();
+    var initializationSettingsAndroid = const AndroidInitializationSettings('panda');
+    var initializationSettingsIOS = const IOSInitializationSettings();
+    var initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    flutterLocalNotificationsPlugin =  FlutterLocalNotificationsPlugin();
     flutterLocalNotificationsPlugin.initialize(initializationSettings,onSelectNotification: (String? payload) async {
       if (payload != null) {
         debugPrint('notification payload: $payload');
@@ -60,12 +60,12 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
     });
   }
   Future _showNotificationWithDefaultSound(String title) async {
-    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
         'your channel id', 'your channel name',
         importance: Importance.max, priority: Priority.high,
       icon: 'panda');
-    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
-    var platformChannelSpecifics = new NotificationDetails(
+    var iOSPlatformChannelSpecifics = const IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
       0,
@@ -78,7 +78,8 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   @override
   Widget build(BuildContext context) {
     alarms = widget.alarmas;
-    Timer miTimer = Timer.periodic(Duration(seconds: 10),(timer){
+    keys = frasesClave();
+    Timer miTimer = Timer.periodic(const Duration(seconds: 10),(timer){
       //El codigo se ejecuta cada 30 seg
       for(int i=0;i<alarms.length;i++){
         print('hola $i');
@@ -104,7 +105,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
             child: Column(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top:20, bottom: 0),
+                  margin: const EdgeInsets.only(top:45),
                   padding: const EdgeInsets.all(20),
                   width: double.infinity,//Toma el largo horizontal
                   //color: Colors.grey[100], //Color de fondo
@@ -121,6 +122,13 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                         'Estas son las frases que puedes utilizar para realizar acciones en la aplicación sin necesidad de escribir :)',
                         style: TextStyle(fontSize: 15),
                       ),
+                      SizedBox(   //Espacio entre textos
+                        height: 10,
+                      ),
+                      Text(
+                        'No olvides que después de activar alguna opción debes seguir las instrucciones de la asistente por voz.',
+                        style: TextStyle(fontSize: 15),
+                      ),
                     ],
                   ),
                 ),
@@ -132,7 +140,6 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                       color: Colors.grey[100],
                       child: ListTile(
                         title: Text(keys[index]),
-                        subtitle: const Text('Icream is good for health'),
                       ),
                     ),
                   ),
@@ -265,19 +272,18 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _text = 'Presiona el botón y empieza a hablar';
-  double _confidence = 1.0;
-  bool _isReading = false;
   FlutterTts flutertts = FlutterTts();
-  bool eliminar = false;
+  bool eliminar = true;
+  int controlador = 0;
+  String descripcionAlarma = '';
+  int dia = -1, mes = -1, hora = -1;
+  late DateTime fechaAlarma;
+  late TimeOfDay horaAlarma;
+
   void _read (String text) async{
-    if (!_isReading) {
-      setState(() => _isReading = true);
-      await flutertts.setLanguage('es-ES');
-      await flutertts.setPitch(1);
-      await flutertts.speak(text);
-    } else {
-      setState(() => _isReading = false);
-    }
+    await flutertts.setLanguage('es-ES');
+    await flutertts.setPitch(1);
+    await flutertts.speak(text);
   }
 
   void _listen() async {
@@ -292,26 +298,8 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
           onResult: (val) => setState(() {
             _text = val.recognizedWords;
             print(_text);
-            if(_text.contains('añadir alarma') || _text.contains('Añadir alarma')){
+            if(_text.contains('Abrir menú') || _text.contains('abrir menú')){
               modalAlarma();
-            } else if(_text.contains('Eliminar alarma')|| _text.contains('eliminar alarma')){
-              _read('Ok!, dime el título de la alarma que quieres eliminar');
-              eliminar = true;
-            }else if(eliminar && _text.isNotEmpty){
-              print('entro');
-              for(int i=0;i<alarms.length;i++){
-                if(alarms[i].descripcion.toUpperCase()==_text.toUpperCase()){
-                  setState((){
-                    alarms.removeAt(i);
-                    print('Eliminado');
-                    _read('Ok! se eliminó la alarma');
-                  });
-                }
-              }
-              eliminar = false;
-            }
-            if (val.hasConfidenceRating && val.confidence > 0) {
-              _confidence = val.confidence;
             }
           }),
         );
@@ -319,7 +307,135 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
     } else {
       setState(() => _isListening = false);
       _speech.stop();
+      print(_text);
+      print(controlador);
+      if(_text.isEmpty){
+        _read('No se le escuchó, puede repetir por favor');
+      } else {
+        if (_text.contains('cancelar') || _text.contains('Cancelar')){
+          _read('Proceso cancelado');
+          controlador = 0;
+          eliminar = true;
+          _text = '';
+        } else if(_text.contains('Eliminar alarma')|| _text.contains('eliminar alarma')){
+          _read('Ok!, dime la descripción de la alarma que quieres eliminar');
+          eliminar = false;
+          controlador = 0;
+          _text = '';
+        } else {
+          if (eliminar) {
+            if(controlador==0){
+              if(_text.contains('añadir alarma') || _text.contains('Añadir alarma')){
+                _read('Hola!, por favor dime la descripción de la alarma que quieres añadir');
+                controlador = 1;
+              } else {
+                _read('Ocurrio un error puede repetir la orden por favor');
+              }
+            } else if (controlador==1){
+              _read('Indique el día en el que se mandará la alarma');
+              descripcionAlarma = _text;
+              print('Descripcion: '+descripcionAlarma);
+              controlador = 2;
+            } else if (controlador==2){
+              try {
+                dia = int.parse(_text);
+                _read('Indique el mes en el que se mandará la alarma');
+                controlador = 3;
+              } on FormatException {
+                _read("No es un día, por favor intente de nuevo");
+              }
+            } else if (controlador==3){
+              if (comprobarMes(_text)>0) {
+                mes = comprobarMes(_text);
+                _read('Indique el año en el que se mandará la alarma');
+                controlador = 4;
+              } else {
+                _read("No es un mes, por favor intente de nuevo");
+              }
+            } else if (controlador==4){
+              try {
+                int anio = int.parse(_text);
+                fechaAlarma = DateTime.utc(anio, mes, dia);
+                _read("Indique solo la hora cuando se le debe mandar la alarma");
+                controlador = 5;
+              } on FormatException {
+                _read("No es un año, por favor intente de nuevo");
+              }
+            } else if (controlador==5) {
+              try {
+                hora = int.parse(_text);
+                _read('Indique solo los minutos cuando se le debe mandar la alarma');
+                controlador = 6;
+              } on FormatException {
+                _read("No es una hora, por favor intente de nuevo");
+              }
+            } else {
+              try {
+                int min = int.parse(_text);
+                horaAlarma = TimeOfDay(hour: hora, minute: min);
+                var aux = Alarm(fechaAlarma, horaAlarma, descripcionAlarma);
+                alarms.add(aux);
+                _read('La alarma se guardo adecuadamente');
+                controlador = 7;
+              } on FormatException {
+                _read("No son minutos, por favor intente de nuevo");
+              }
+            }
+            _text = '';
+          } else {
+            bool f = false;
+            print('entro');
+            for(int i=0;i<alarms.length;i++){
+              if(alarms[i].descripcion.toUpperCase()==_text.toUpperCase()){
+                setState((){
+                  alarms.removeAt(i);
+                  f = true;
+                  print('Eliminado');
+                  _read('Ok! se eliminó la alarma');
+                });
+              }
+            }
+            if (f){
+              eliminar = true;
+              _text = '';
+            } else {
+              _read('Alarma no encontrada intente de nuevo');
+            }
+          }
+        }
+      }
     }
+  }
+
+  int comprobarMes(String mes){
+    int flag = -1;
+    switch(mes){
+      case 'Enero': flag = 1; break;
+      case 'enero': flag = 1; break;
+      case 'Febrero': flag = 2; break;
+      case 'febrero': flag = 2; break;
+      case 'Marzo': flag = 3; break;
+      case 'marzo': flag = 3; break;
+      case 'Abril': flag = 4; break;
+      case 'abril': flag = 4; break;
+      case 'Mayo': flag = 5; break;
+      case 'mayo': flag = 5; break;
+      case 'Junio': flag = 6; break;
+      case 'junio': flag = 6; break;
+      case 'Julio': flag = 7; break;
+      case 'julio': flag = 7; break;
+      case 'Agosto': flag = 8; break;
+      case 'agosto': flag = 8; break;
+      case 'Septiembre': flag = 9; break;
+      case 'septiembre': flag = 9; break;
+      case 'Octubre': flag = 10; break;
+      case 'octubre': flag = 10; break;
+      case 'Noviembre': flag = 11; break;
+      case 'noviembre': flag = 11; break;
+      case 'Diciembre': flag = 12; break;
+      case 'diciembre': flag = 12; break;
+    }
+    return flag;
   }
 
   modalAlarma(){

@@ -3,8 +3,6 @@ import 'package:intl/intl.dart';
 import '../clases/tarea.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:avatar_glow/avatar_glow.dart';
-import 'package:highlight_text/highlight_text.dart';
 
 class ScreenWork extends StatefulWidget {
   List<Tarea> works;
@@ -15,16 +13,23 @@ class ScreenWork extends StatefulWidget {
 }
 
 class _ScreenWorkState extends State<ScreenWork> {
-  int _selectedIndex = 0;
-
   bool isChecked = false;
-  //final tareas = List<String>.generate(100, (i) => "Tarea $i");
   List<Tarea> tareas = [];
-  final frases = List<String>.generate(20, (i) => "Frase $i");
+  List<String> frases = [];
   late DateTime _myDateTime;
   TextEditingController miVar = TextEditingController();
   TextEditingController valorFechaInicio = TextEditingController();
   TextEditingController valorFechaFinal = TextEditingController();
+
+  List<String> frasesClave (){
+    List<String> aux = [];
+    aux.add('ABRIR MENU te permite abrir el modal para agregar una nueva tarea');
+    aux.add('AÑADIR TAREA te permite agregar una nueva tarea utilizando la asistente por voz');
+    aux.add('ELIMINAR TAREA te permite eliminar una tarea utilizando la asistente por voz');
+    aux.add('CANCELAR te permite cancelar cualquier proceso en cualquier instante');
+    return aux;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -37,15 +42,10 @@ class _ScreenWorkState extends State<ScreenWork> {
     print('se agregó la tarea');
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     tareas = widget.works;
+    frases = frasesClave();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
@@ -58,7 +58,7 @@ class _ScreenWorkState extends State<ScreenWork> {
             child: Column(
               children: [
                 Container(
-                  margin: const EdgeInsets.only(top:20, bottom: 0),
+                  margin: const EdgeInsets.only(top:45),
                   padding: const EdgeInsets.all(20),
                   width: double.infinity,//Toma el largo horizontal
                   //color: Colors.grey[100], //Color de fondo
@@ -75,6 +75,13 @@ class _ScreenWorkState extends State<ScreenWork> {
                         'Estas son las frases que puedes utilizar para realizar acciones en la aplicación sin necesidad de escribir :)',
                         style: TextStyle(fontSize: 15),
                       ),
+                      SizedBox(   //Espacio entre textos
+                        height: 10,
+                      ),
+                      Text(
+                        'No olvides que después de activar alguna opción debes seguir las instrucciones de la asistente por voz.',
+                        style: TextStyle(fontSize: 15),
+                      ),
                     ],
                   ),
                 ),
@@ -86,7 +93,6 @@ class _ScreenWorkState extends State<ScreenWork> {
                         color: Colors.grey[100],
                         child: ListTile(
                           title: Text(frases[index]),
-                          subtitle: const Text('Icream is good for health'),
                         ),
                       ),
                     ),
@@ -165,7 +171,7 @@ class _ScreenWorkState extends State<ScreenWork> {
                             },
                           ),
                           title: Text(tareas[index].descripcion, style: TextStyle(fontFamily: 'DidactGothic')),
-                          //subtitle: Text('Icream is good for health'),
+                          subtitle: Text(tareas[index].fecha_inicio),
                           trailing: CircleAvatar(
                             backgroundColor: const Color.fromRGBO(255, 212, 212, 1),
                             radius: 15,
@@ -231,20 +237,19 @@ class _ScreenWorkState extends State<ScreenWork> {
   }
   late stt.SpeechToText _speech;
   bool _isListening = false;
-  String _text = 'Presiona el botón y empieza a hablar';
-  double _confidence = 1.0;
-  bool _isReading = false;
+  String _text = '';
   FlutterTts flutertts = FlutterTts();
-  bool eliminar = false;
+  bool eliminar = true;
+  int controlador = 0;
+  String descripcionTarea = '';
+  int dia = -1;
+  int mes = -1;
+  String fechaInicioTarea = '';
+
   void _read (String text) async{
-    if (!_isReading) {
-      setState(() => _isReading = true);
-      await flutertts.setLanguage('es-ES');
-      await flutertts.setPitch(1);
-      await flutertts.speak(text);
-    } else {
-      setState(() => _isReading = false);
-    }
+    await flutertts.setLanguage('es-ES');
+    await flutertts.setPitch(1);
+    await flutertts.speak(text);
   }
   void _listen() async {
     if (!_isListening) {
@@ -255,29 +260,11 @@ class _ScreenWorkState extends State<ScreenWork> {
       if (available) {
         setState(() => _isListening = true);
         _speech.listen(
-          onResult: (val) => setState(() {
+          onResult: (val) => setState(() async {
             _text = val.recognizedWords;
             print(_text);
-            if(_text.contains('añadir tarea') || _text.contains('Añadir tarea')){
+            if(_text.contains('Abrir menú') || _text.contains('abrir menú')){
               modalAddTarea(context);
-            }else if(_text.contains('Eliminar tarea')|| _text.contains('eliminar tarea')){
-              _read('Ok!, dime el título de la tarea que quieres eliminar');
-              eliminar = true;
-            }else if(eliminar && _text.isNotEmpty){
-              print('entro');
-              for(int i=0;i<tareas.length;i++){
-                if(tareas[i].descripcion.toUpperCase()==_text.toUpperCase()){
-                  setState((){
-                    tareas.removeAt(i);
-                    print('Eliminado');
-                    _read('Ok! se eliminó la tarea');
-                  });
-                }
-              }
-              eliminar = false;
-            }
-            if (val.hasConfidenceRating && val.confidence > 0) {
-              _confidence = val.confidence;
             }
           }),
         );
@@ -285,7 +272,131 @@ class _ScreenWorkState extends State<ScreenWork> {
     } else {
       setState(() => _isListening = false);
       _speech.stop();
+      print(_text);
+      print(controlador);
+      if(_text.isEmpty){
+        _read('No se le escuchó, puede repetir por favor');
+      } else {
+        if (_text.contains('cancelar') || _text.contains('Cancelar')){
+          _read('Proceso cancelado');
+          controlador = 0;
+          eliminar = true;
+          _text = '';
+        } else if(_text.contains('Eliminar tarea')|| _text.contains('eliminar tarea')){
+          _read('Ok!, dime el título de la tarea que quieres eliminar');
+          eliminar = false;
+          controlador = 0;
+          _text = '';
+        } else {
+          if (eliminar) {
+            if(controlador==0){
+              if(_text.contains('añadir tarea') || _text.contains('Añadir tarea')){
+                _read('Hola!, por favor dime el título de la tarea que quieres añadir');
+                controlador = 1;
+              } else {
+                _read('Ocurrio un error puede repetir la orden por favor');
+              }
+            } else if (controlador==1){
+              _read('Indique el día en el que se realizará la tarea');
+              descripcionTarea = _text;
+              print('Descripcion: '+descripcionTarea);
+              controlador = 2;
+            } else if (controlador==2){
+              try {
+                dia = int.parse(_text);
+                _read('Indique el mes en el que se realizará la tarea');
+                controlador = 3;
+              } on FormatException {
+                _read("No es un día, por favor intente de nuevo");
+              }
+            } else if (controlador==3){
+              if (comprobarMes(_text)>0) {
+                mes = comprobarMes(_text);
+                _read('Indique el año en el que se realizará la tarea');
+                controlador = 4;
+              } else {
+                _read("No es un mes, por favor intente de nuevo");
+              }
+            } else {
+              try {
+                int anio = int.parse(_text);
+                if(dia<10){
+                  if(mes<10){
+                    fechaInicioTarea = '$anio-0$mes-0$dia';
+                  } else {
+                    fechaInicioTarea = '$anio-$mes-0$dia';
+                  }
+                } else {
+                  if(mes<10){
+                    fechaInicioTarea = '$anio-0$mes-$dia';
+                  } else {
+                    fechaInicioTarea = '$anio-$mes-$dia';
+                  }
+                }
+                var aux = Tarea(cod_tarea: 2, descripcion: descripcionTarea, fecha_inicio: fechaInicioTarea, terminada: false);
+                insertTarea(aux);
+                _read('La tarea se guardo de forma adecuada');
+                print(fechaInicioTarea);
+                controlador = 0;
+              } on FormatException {
+                _read("No es un año, por favor intente de nuevo");
+              }
+            }
+            _text = '';
+          } else {
+            bool f = false;
+            print('entro');
+            for(int i=0;i<tareas.length;i++){
+              if(tareas[i].descripcion.toUpperCase()==_text.toUpperCase()){
+                setState((){
+                  tareas.removeAt(i);
+                  f = true;
+                  print('Eliminado');
+                  _read('Ok! se eliminó la tarea');
+                });
+              }
+            }
+            if (f){
+              eliminar = true;
+              _text = '';
+            } else {
+              _read('Tarea no encontrada intente de nuevo');
+            }
+          }
+        }
+      }
     }
+  }
+
+  int comprobarMes(String mes){
+    int flag = -1;
+    switch(mes){
+      case 'Enero': flag = 1; break;
+      case 'enero': flag = 1; break;
+      case 'Febrero': flag = 2; break;
+      case 'febrero': flag = 2; break;
+      case 'Marzo': flag = 3; break;
+      case 'marzo': flag = 3; break;
+      case 'Abril': flag = 4; break;
+      case 'abril': flag = 4; break;
+      case 'Mayo': flag = 5; break;
+      case 'mayo': flag = 5; break;
+      case 'Junio': flag = 6; break;
+      case 'junio': flag = 6; break;
+      case 'Julio': flag = 7; break;
+      case 'julio': flag = 7; break;
+      case 'Agosto': flag = 8; break;
+      case 'agosto': flag = 8; break;
+      case 'Septiembre': flag = 9; break;
+      case 'septiembre': flag = 9; break;
+      case 'Octubre': flag = 10; break;
+      case 'octubre': flag = 10; break;
+      case 'Noviembre': flag = 11; break;
+      case 'noviembre': flag = 11; break;
+      case 'Diciembre': flag = 12; break;
+      case 'diciembre': flag = 12; break;
+    }
+    return flag;
   }
   modalAddTarea(BuildContext context){
     Widget okButton = TextButton(
