@@ -7,39 +7,26 @@ import '../clases/alarm.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 
-class ScreenAlarm extends StatefulWidget {
-  List <Alarm> alarmas;
-  ScreenAlarm(this.alarmas);
+import '../clases/alarmaBD.dart';
+
+class _MyList extends StatefulWidget {
+  const _MyList({Key? key}) : super(key: key);
 
   @override
-  State<ScreenAlarm> createState() => _ScreenAlarmState();
+  State<_MyList> createState() => _MyListState();
 }
 
-class _ScreenAlarmState extends State<ScreenAlarm> {
-  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  List<int> indexEjecutados = [];
-  int _colorSelected = -1;
+class _MyListState extends State<_MyList> {
   List <Alarm> alarms = [];
   List <Color> colorBack = [const Color.fromRGBO(255, 237, 237, 1), const Color.fromRGBO(255, 240, 227, 1), const Color.fromRGBO(252, 249, 221, 1), const Color.fromRGBO(241, 250, 240, 1), const Color.fromRGBO(230, 247, 250, 1), const Color.fromRGBO(240, 237, 247, 1)];
   List <Color> colorLetter = [const Color.fromRGBO(173, 66, 60, 1), const Color.fromRGBO(245, 164, 77, 1), const Color.fromRGBO(179, 168, 16, 1), const Color.fromRGBO(143, 174, 45, 1), const Color.fromRGBO(67, 157, 187, 1), const Color.fromRGBO(113, 86, 150, 1)];
-  TextEditingController date = TextEditingController();
-  TextEditingController hour = TextEditingController();
-  TextEditingController name = TextEditingController();
-  DateTime _myDateTime = DateTime.now();
-  TimeOfDay _myHourTime = TimeOfDay.now();
+  List<int> indexEjecutados = [];
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  int getColor(){
-    if(_colorSelected == 5){
-      _colorSelected = 0;
-    } else {
-      _colorSelected++;
-    }
-    return _colorSelected;
-  }
   @override
   void initState(){
+    _loadData();
     super.initState();
-    _speech = stt.SpeechToText();
     var initializationSettingsAndroid = const AndroidInitializationSettings('panda');
     var initializationSettingsIOS = const IOSInitializationSettings();
     var initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
@@ -54,7 +41,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
         'your channel id', 'your channel name',
         importance: Importance.max, priority: Priority.high,
-      icon: 'panda');
+        icon: 'panda');
     var iOSPlatformChannelSpecifics = const IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
@@ -68,7 +55,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
   }
   @override
   Widget build(BuildContext context) {
-    alarms = widget.alarmas;
+    _loadData();
     Timer miTimer = Timer.periodic(const Duration(seconds: 10),(timer){
       //El codigo se ejecuta cada 30 seg
       for(int i=0;i<alarms.length;i++){
@@ -84,6 +71,129 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
         }
       }
     });
+    return ListView.builder(
+      itemCount: alarms.length,
+      itemBuilder: (context, index) => Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        margin: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 10),
+        elevation: 3,
+        color: colorBack[index%6],
+        child: ListTile(
+          leading: Image.asset('assets/reloj.png', height: 35),
+          title: Text('${alarms[index].descripcion} ', style: TextStyle(color: colorLetter[index%6], fontFamily: 'DidactGothic'),),
+          subtitle: Text('${DateFormat('dd-MM-yyyy').format(alarms[index].fecha)} ${alarms[index].hora.hour}:${alarms[index].hora.minute}', style: const TextStyle(color: Color.fromRGBO(113, 113, 113, 1)),),
+          trailing: CircleAvatar(
+            backgroundColor: Colors.white,
+            radius: 20,
+            child: IconButton(
+              onPressed: (){
+                setState(() {
+                  //alarms.removeWhere((element) => (element == alarms[index]));
+                  Operation.deleteAlarma(alarms[index].cod_alarma);
+                  indexEjecutados.remove(index);
+                });
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Color.fromRGBO(173, 66, 60, 1),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  _loadData () async{
+    List<AlarmaBD> auxAlarma= await Operation.alarmas();
+    List<Alarm> cambioAlarmas = cambiarTipoDatos(auxAlarma);
+    setState((){
+      alarms = cambioAlarmas;
+    });
+  }
+
+  List<Alarm> cambiarTipoDatos(List<AlarmaBD> listaInicial){
+    List<Alarm> lista = [];
+    for(int i=0; i<listaInicial.length; i++){
+      AlarmaBD dato = listaInicial[i];
+      final splitter = dato.fecha.split('-');
+      print(splitter);
+      int dia = int.parse(splitter[0]);
+      int anio = int.parse(splitter[2]);
+      int mes = int.parse(splitter[1]);
+      DateTime nuevaFecha = DateTime.utc(anio, mes, dia);
+      final splitterHora = dato.hora.split(':');
+      print(splitterHora);
+      int hora = int.parse(splitterHora[0]);
+      int min = int.parse(splitterHora[1]);
+      TimeOfDay nuevaHora = TimeOfDay(hour: hora, minute: min);
+      var alarma = Alarm(cod_alarma: dato.cod_alarma, fecha: nuevaFecha, hora: nuevaHora, descripcion: dato.descripcion);
+      lista.add(alarma);
+    }
+    return lista;
+  }
+
+}
+
+
+
+class ScreenAlarm extends StatefulWidget {
+  List <Alarm> alarmas;
+  ScreenAlarm(this.alarmas);
+
+  @override
+  State<ScreenAlarm> createState() => _ScreenAlarmState();
+}
+
+class _ScreenAlarmState extends State<ScreenAlarm> {
+
+  List <Alarm> alarms = [];
+  TextEditingController date = TextEditingController();
+  TextEditingController hour = TextEditingController();
+  TextEditingController name = TextEditingController();
+  DateTime _myDateTime = DateTime.now();
+  TimeOfDay _myHourTime = TimeOfDay.now();
+
+
+  @override
+  void initState(){
+    super.initState();
+    _speech = stt.SpeechToText();
+
+  }
+  _loadData () async{
+    List<AlarmaBD> auxAlarma= await Operation.alarmas();
+    List<Alarm> cambioAlarmas = cambiarTipoDatos(auxAlarma);
+    setState((){
+      alarms = cambioAlarmas;
+    });
+  }
+
+  List<Alarm> cambiarTipoDatos(List<AlarmaBD> listaInicial){
+    List<Alarm> lista = [];
+    for(int i=0; i<listaInicial.length; i++){
+      AlarmaBD dato = listaInicial[i];
+      final splitter = dato.fecha.split('-');
+      print(splitter);
+      int dia = int.parse(splitter[0]);
+      int anio = int.parse(splitter[2]);
+      int mes = int.parse(splitter[1]);
+      DateTime nuevaFecha = DateTime.utc(anio, mes, dia);
+      final splitterHora = dato.hora.split(':');
+      print(splitterHora);
+      int hora = int.parse(splitterHora[0]);
+      int min = int.parse(splitterHora[1]);
+      TimeOfDay nuevaHora = TimeOfDay(hour: hora, minute: min);
+      var alarma = Alarm(cod_alarma: dato.cod_alarma, fecha: nuevaFecha, hora: nuevaHora, descripcion: dato.descripcion);
+      lista.add(alarma);
+    }
+    return lista;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //alarms = widget.alarmas;
+    _loadData();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
@@ -228,36 +338,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: alarms.length,
-                    itemBuilder: (context, index) => Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      margin: const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 10),
-                      elevation: 3,
-                      color: colorBack[getColor()],
-                      child: ListTile(
-                        leading: Image.asset('assets/reloj.png', height: 35),
-                        title: Text('${alarms[index].descripcion} ', style: TextStyle(color: colorLetter[_colorSelected], fontFamily: 'DidactGothic'),),
-                        subtitle: Text('${DateFormat('dd-MM-yyyy').format(alarms[index].fecha)} ${alarms[index].hora.hour}:${alarms[index].hora.minute}', style: const TextStyle(color: Color.fromRGBO(113, 113, 113, 1)),),
-                        trailing: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 20,
-                          child: IconButton(
-                            onPressed: (){
-                              setState(() {
-                                alarms.removeWhere((element) => (element == alarms[index]));
-                                indexEjecutados.remove(index);
-                              });
-                            },
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Color.fromRGBO(173, 66, 60, 1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: _MyList()
                 ),
               ],
             ),
@@ -395,9 +476,10 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
               try {
                 int min = int.parse(_text);
                 horaAlarma = TimeOfDay(hour: hora, minute: min);
-                var aux = Alarm(cod_alarma: 1, fecha: fechaAlarma,hora: horaAlarma, descripcion: descripcionAlarma);
-                alarms.add(aux);
-
+                String nuevaFecha = DateFormat('dd-MM-yyyy').format(fechaAlarma);
+                String nuevaHora = "${horaAlarma.hour}:${horaAlarma.minute}";
+                AlarmaBD auxBD = AlarmaBD(cod_alarma: 1, fecha: nuevaFecha, hora: nuevaHora, descripcion: name.text.toString());
+                Operation.insertAlarma(auxBD);
                 _read('La alarma se guardo adecuadamente');
                 controlador = 0;
               } on FormatException {
@@ -411,7 +493,7 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
             for(int i=0;i<alarms.length;i++){
               if(alarms[i].descripcion.toUpperCase()==_text.toUpperCase()){
                 setState((){
-                  alarms.removeAt(i);
+                  Operation.deleteAlarma(alarms[i].cod_alarma);
                   f = true;
                   print('Eliminado');
                   _read('Ok! se eliminó la alarma');
@@ -568,8 +650,12 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                           FlatButton(
                               onPressed: (){
                                 setState(() {
-                                  Alarm aux = Alarm(cod_alarma: 1, fecha: _myDateTime, hora: _myHourTime, descripcion: name.text.toString());
-                                  alarms.add(aux);
+                                  //Alarm aux = Alarm(cod_alarma: 1, fecha: _myDateTime, hora: _myHourTime, descripcion: name.text.toString());
+                                  String fecha = DateFormat('dd-MM-yyyy').format(_myDateTime);
+                                  String hora = "${_myHourTime.hour}:${_myHourTime.minute}";
+                                  AlarmaBD auxBD = AlarmaBD(cod_alarma: 1, fecha: fecha, hora: hora, descripcion: name.text.toString());
+                                  //alarms.add(aux);
+                                  Operation.insertAlarma(auxBD);
                                   Navigator.of(context).pop();
                                   hour.text = '';
                                   date.text = '';

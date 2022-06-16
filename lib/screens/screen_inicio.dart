@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../clases/actividad.dart';
 import '../clases/alarm.dart';
+import '../clases/operation.dart';
 import '../clases/tarea.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
@@ -25,13 +26,27 @@ class _ScreenMainState extends State<ScreenMain> {
 
   @override
   void initState() {
+    _loadData();
     super.initState();
     _speech = stt.SpeechToText();
   }
-
+  _loadData () async{
+    List<Tarea> auxTarea = await Operation.tareas2();
+    setState((){
+      tareas = auxTarea;
+    });
+  }
+  bool getBool(int i){
+    bool result = false;
+    if(i==1){
+      result = true;
+    }
+    return result;
+  }
   @override
   Widget build(BuildContext context) {
-    tareas = widget.works;
+    //tareas = widget.works;
+    _loadData();
     alarms = widget.alarmas;
     actividades = widget.activities;
 
@@ -163,19 +178,25 @@ class _ScreenMainState extends State<ScreenMain> {
                           trailing: Image.asset('assets/check.png', height: 30,),
                         ),
                       ),
-                      /*ListTile(
+                      ListTile(
                         leading: Checkbox(
                           activeColor: const Color.fromRGBO(169, 151, 196, 1),
-                          value: tareas[0].terminada,
+                          value: getBool(tareas[0].terminada),
                           onChanged: (value) {
                             setState(() {
-                              print(0);
                               isChecked = value!;
-                              if(tareas[0].terminada){
-                                tareas[0].terminada = false;
+                              int terminada;
+                              if(tareas[0].terminada==1){
+                                terminada = 0;
                               }else{
-                                tareas[0].terminada = true;
+                                terminada = 1;
                               }
+                              var auxTarea = Tarea(cod_tarea: tareas[0].cod_tarea,
+                                  descripcion: tareas[0].descripcion,
+                                  fecha_inicio: tareas[0].fecha_inicio,
+                                  terminada: terminada);
+                              Operation.updateTarea(auxTarea);
+                              print("cambio $terminada");
                             });
                           },
                         ),
@@ -184,21 +205,27 @@ class _ScreenMainState extends State<ScreenMain> {
                       ListTile(
                         leading: Checkbox(
                           activeColor: const Color.fromRGBO(169, 151, 196, 1),
-                          value: tareas[1].terminada,
+                          value: getBool(tareas[1].terminada),
                           onChanged: (value) {
                             setState(() {
-                              print(1);
                               isChecked = value!;
-                              if(tareas[1].terminada){
-                                tareas[1].terminada = false;
+                              int terminada;
+                              if(tareas[1].terminada==1){
+                                terminada = 0;
                               }else{
-                                tareas[1].terminada = true;
+                                terminada = 1;
                               }
+                              var auxTarea = Tarea(cod_tarea: tareas[1].cod_tarea,
+                                  descripcion: tareas[1].descripcion,
+                                  fecha_inicio: tareas[1].fecha_inicio,
+                                  terminada: terminada);
+                              Operation.updateTarea(auxTarea);
+                              print("cambio $terminada");
                             });
                           },
                         ),
                         title: Text(tareas[1].descripcion, style: const TextStyle(fontFamily: 'DidactGothic')),
-                      ),*/
+                      ),
                       Container(
                         decoration: const BoxDecoration(
                             border: Border(

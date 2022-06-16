@@ -2,8 +2,8 @@ import 'package:agenda_project/clases/tarea.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
 import 'actividad.dart';
+import 'alarmaBD.dart';
 class Operation{
   static Future<Database> _openDB() async{
     return openDatabase(
@@ -96,6 +96,74 @@ class Operation{
     return db.delete(
       'actividad',
       where: "cod_actividad = ?",
+      whereArgs: [id],
+    );
+  }
+  //Mostrar dos tareas
+  static Future<List<Tarea>> tareas2() async {
+    Database db = await _openDB();
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM tarea ORDER BY fecha_inicio DESC LIMIT 2");
+    return List.generate(maps.length, (i) {
+      return Tarea(
+          cod_tarea: maps[i]['cod_tarea'],
+          descripcion: maps[i]['descripcion'],
+          fecha_inicio: maps[i]['fecha_inicio'],
+          terminada: maps[i]['terminada']
+      );
+    });
+  }
+  //Mostrar dos actividades
+  static Future<List<Actividad>> actividades2() async {
+    Database db = await _openDB();
+    final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM actividad ORDER BY fecha_realizacion DESC LIMIT 2");
+    return List.generate(maps.length, (i) {
+      return Actividad(
+          cod_actividad: maps[i]['cod_actividad'],
+          descripcion: maps[i]['descripcion'],
+          fecha_realizacion: maps[i]['fecha_realizacion'],
+          hora_inicio: maps[i]['hora_inicio'],
+          hora_final: maps[i]['hora_final']
+      );
+    });
+  }
+
+  //Alarmas
+  //insert alarma
+  static Future<int> insertAlarma(AlarmaBD alarma) async{
+    Database database = await _openDB();
+    return database.insert("alarma", alarma.toMap());
+  }
+
+  //Mostrar alarma
+  static Future<List<AlarmaBD>> alarmas() async {
+    Database db = await _openDB();
+    final List<Map<String, dynamic>> maps = await db.query('alarma');
+    return List.generate(maps.length, (i) {
+      return AlarmaBD(
+          cod_alarma: maps[i]['cod_alarma'],
+          fecha: maps[i]['fecha'],
+          hora: maps[i]['hora'],
+          descripcion: maps[i]['descripcion']
+      );
+    });
+  }
+  //update alarma
+  static Future<int> updateAlarma(AlarmaBD alarma) async {
+    Database db = await _openDB();
+    return db.update(
+      'alarma',
+      alarma.toMap(),
+      where: "cod_alarma = ?",
+      whereArgs: [alarma.cod_alarma],
+    );
+  }
+
+  //eliminar alarma
+  static Future<int> deleteAlarma(int id) async {
+    Database db = await _openDB();
+    return db.delete(
+      'alarma',
+      where: "cod_alarma = ?",
       whereArgs: [id],
     );
   }
