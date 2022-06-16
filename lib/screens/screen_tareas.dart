@@ -201,17 +201,7 @@ class _ScreenWorkState extends State<ScreenWork> {
                     subtitle: Text('Esta frase te permite cancelar cualquier proceso en cualquier momento.'),
                   ),
                 ),
-                const SizedBox(   //Espacio entre textos
-                  height: 5,
-                ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 2),
-                  color: Colors.grey[100],
-                  child: const ListTile(
-                    title: Text('LEER TAREAS'),
-                    subtitle: Text('Esta frase activa el asistente por voz y hace que te lo lea tus tareas.'),
-                  ),
-                ),
+
               ],
             ),
           ),
@@ -404,7 +394,6 @@ class _ScreenWorkState extends State<ScreenWork> {
                     }
                   }
                   var aux = Tarea(cod_tarea: 2, descripcion: descripcionTarea, fecha_inicio: fechaInicioTarea, terminada: 0);
-                  //insertTarea(aux);
                   Operation.insertTarea(aux);
                   _read('La tarea se guardo de forma adecuada');
                   controlador = 0;

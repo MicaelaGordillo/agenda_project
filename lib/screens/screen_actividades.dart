@@ -36,9 +36,8 @@ class _MyListState extends State<_MyList> {
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: ListTile(
-
           title: Text('${actividades[index].descripcion}', style: TextStyle(fontFamily: 'DidactGothic', color: Color.fromRGBO(56, 56, 56, 1)),),
-          //subtitle: Text('Icream is good for health'),
+          subtitle: Text('${actividades[index].fecha_realizacion}', style: TextStyle(fontFamily: 'DidactGothic', color: Color.fromRGBO(56, 56, 56, 1)),),
           trailing:
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -186,17 +185,6 @@ class _ScreenActividadesState extends State<ScreenActividades> {
                   child: const ListTile(
                     title: Text('CANCELAR'),
                     subtitle: Text('Esta frase te permite cancelar cualquier proceso en cualquier momento.'),
-                  ),
-                ),
-                const SizedBox(   //Espacio entre textos
-                  height: 5,
-                ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 2),
-                  color: Colors.grey[100],
-                  child: const ListTile(
-                    title: Text('LEER ACTIVIDADES'),
-                    subtitle: Text('Esta frase activa el asistente por voz y hace que te lo lea tus actividades.'),
                   ),
                 ),
               ],

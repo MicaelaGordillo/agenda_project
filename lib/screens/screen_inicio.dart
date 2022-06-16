@@ -178,18 +178,6 @@ class _ScreenMainState extends State<ScreenMain> {
                         ),
                       ),
                       ListTareas(),
-                      Container(
-                        decoration: const BoxDecoration(
-                            border: Border(
-                              top: BorderSide(color: Color.fromRGBO(226, 221, 235, 1), width: 3.0,),
-                            )
-                        ),
-                        child: const ListTile(
-                          trailing: Text('Ver más',
-                            style: TextStyle(color: Colors.blue, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Quicksand',),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -220,16 +208,6 @@ class _ScreenMainState extends State<ScreenMain> {
                         ),
                       ),
                       ListaActividades(),
-                      RaisedButton(
-                        color: Colors.white,
-                        child: const ListTile(
-                          trailing: Text('Ver más',
-                            style: TextStyle(color: Colors.blue, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Quicksand',),
-                          ),
-                        ),
-                        onPressed: (){
-                        }
-                      ),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -245,11 +223,6 @@ class _ScreenMainState extends State<ScreenMain> {
                         trailing: Image.asset('assets/calendario.png', height: 40,),
                       ),
                       ListaAlarmas(),
-                      const ListTile(
-                        trailing: Text('Ver más',
-                          style: TextStyle(color: Colors.blue, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Quicksand',),
-                        ),
-                      ),
                     ],
                   ),
                 ),

@@ -273,17 +273,6 @@ class _ScreenAlarmState extends State<ScreenAlarm> {
                     subtitle: Text('Esta frase te permite cancelar cualquier proceso en cualquier momento.'),
                   ),
                 ),
-                const SizedBox(   //Espacio entre textos
-                  height: 5,
-                ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 2),
-                  color: Colors.grey[100],
-                  child: const ListTile(
-                    title: Text('LEER ALARMAS'),
-                    subtitle: Text('Esta frase activa el asistente por voz y hace que te lo lea tus alarmas.'),
-                  ),
-                ),
               ],
             ),
           ),
