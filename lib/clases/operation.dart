@@ -7,11 +7,11 @@ import 'actividad.dart';
 class Operation{
   static Future<Database> _openDB() async{
     return openDatabase(
-      join(await getDatabasesPath(), 'prueba4.db'), onCreate: (db, version){
+      join(await getDatabasesPath(), 'prueba6.db'), onCreate: (db, version){
         db.execute("CREATE TABLE Tarea (cod_tarea integer NOT NULL CONSTRAINT Tarea_pk PRIMARY KEY AUTOINCREMENT,"+
             "descripcion text NOT NULL, fecha_inicio text NOT NULL, terminada integer NOT NULL);");
         db.execute("CREATE TABLE Actividad (cod_actividad integer NOT NULL CONSTRAINT Actividad_pk PRIMARY KEY AUTOINCREMENT,"+
-            "descripcion text NOT NULL, fecha_inicio text NOT NULL,fecha_final text NOT NULL,hora_inicio text NOT NULL,hora_final text NOT NULL);");
+            "descripcion text NOT NULL, fecha_realizacion text NOT NULL,hora_inicio text NOT NULL,hora_final text NOT NULL);");
         return db.execute("CREATE TABLE Alarma (cod_alarma integer NOT NULL CONSTRAINT Alarma_pk PRIMARY KEY AUTOINCREMENT,"+
             "fecha text NOT NULL, hora text NOT NULL,descripcion text NOT NULL);"
         );
@@ -73,8 +73,7 @@ class Operation{
       return Actividad(
           cod_actividad: maps[i]['cod_actividad'],
           descripcion: maps[i]['descripcion'],
-          fecha_inicio: maps[i]['fecha_inicio'],
-          fecha_final: maps[i]['fecha_final'],
+          fecha_realizacion: maps[i]['fecha_realizacion'],
           hora_inicio: maps[i]['hora_inicio'],
           hora_final: maps[i]['hora_final']
       );

@@ -70,15 +70,17 @@ class _MyAppStfState extends State<MyAppStf> {
         tareas.add(tarea1);
       }
     }
-    var actividad1 = Actividad(cod_actividad: 0,descripcion: 'Ir al gymnasio',fecha_inicio: '2022-06-03', fecha_final: '2022-06-13', hora_inicio: '08:30', hora_final: '10:00',);
-    var actividad2 = Actividad(cod_actividad: 0, descripcion: 'Comer fruta', fecha_inicio: '2022-06-03', fecha_final: '2022-06-13', hora_inicio: '08:30', hora_final: '10:00',);
+    var actividad1 = Actividad(cod_actividad: 0,descripcion: 'Ir al gimnasio',fecha_realizacion: '2022-06-03', hora_inicio: '08:30', hora_final: '10:00',);
+    var actividad2 = Actividad(cod_actividad: 0, descripcion: 'Comer fruta', fecha_realizacion: '2022-06-03', hora_inicio: '08:30', hora_final: '10:00',);
     if(actividades.isEmpty){
       actividades.add(actividad1); actividades.add(actividad2);
     } else if (actividades.length == 1){
       actividades.add(actividad1);
     }
+
     Alarm aux = Alarm(cod_alarma: 1, fecha: DateTime.now(), hora: TimeOfDay.now(), descripcion: 'Alarma 1');
     Alarm aux1 = Alarm(cod_alarma: 1, fecha: DateTime.now(), hora:  TimeOfDay.now(), descripcion: 'Alarma 2');
+
     if(alarms.isEmpty){
       alarms.add(aux); alarms.add(aux1);
     } else if (alarms.length == 1){

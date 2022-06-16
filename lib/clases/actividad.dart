@@ -1,20 +1,18 @@
 class Actividad{
   int cod_actividad;
   String descripcion;
-  String fecha_inicio;
-  String fecha_final;
+  String fecha_realizacion;
   String hora_inicio;
   String hora_final;
 
 
-  Actividad({required this.cod_actividad, required this.descripcion, required this.fecha_inicio,
-      required this.fecha_final, required this.hora_inicio, required this.hora_final});
+  Actividad({required this.cod_actividad, required this.descripcion, required this.fecha_realizacion,
+      required this.hora_inicio, required this.hora_final});
 
   Map<String, dynamic> toMap() {
     return {
       'descripcion': descripcion,
-      'fecha_inicio': fecha_inicio,
-      'fecha_final': fecha_final,
+      'fecha_realizacion': fecha_realizacion,
       'hora_inicio': hora_inicio,
       'hora_final': hora_final,
     };
@@ -24,7 +22,6 @@ class Actividad{
   // usando la declaración de impresión.
   @override
   String toString() {
-    return 'Actividad{id: $cod_actividad, desc: $descripcion, inicio: $fecha_inicio $hora_inicio, final: $fecha_final $hora_final}';
+    return 'Actividad{id: $cod_actividad, desc: $descripcion, fecha realización: $fecha_realizacion, hora inicio: $hora_inicio, final: $hora_final}';
   }
-
 }
