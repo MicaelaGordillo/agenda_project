@@ -3,7 +3,10 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'actividad.dart';
 import 'alarmaBD.dart';
+
 class Operation{
+
+  //Crea la base de datos, si esta no existe. O te devuelve la que exista
   static Future<Database> _openDB() async{
     return openDatabase(
       join(await getDatabasesPath(), 'prueba6.db'), onCreate: (db, version){
@@ -17,13 +20,13 @@ class Operation{
       }, version: 1);
   }
 
-  //insert tarea
+  //Inserta a la tabla tarea el nuevo registro
   static Future<int> insertTarea(Tarea tarea) async{
     Database database = await _openDB();
     return database.insert("tarea", tarea.toMap());
   }
 
-  //Mostrar tarea
+  //Ordena los registros de la mas proxima a la mas lejana por fechas
   static Future<List<Tarea>> tareas() async {
     Database db = await _openDB();
     final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM tarea ORDER BY fecha_inicio ASC");;
@@ -36,7 +39,8 @@ class Operation{
       );
     });
   }
-  //update tarea
+
+  //Actualiza el estado de la tarea, si esta terminada o no
   static Future<int> updateTarea(Tarea tarea) async {
     Database db = await _openDB();
     return db.update(
@@ -47,7 +51,7 @@ class Operation{
     );
   }
 
-  //eliminar tarea
+  //Elimina la tarea en base a su cod/id
   static Future<int> deleteTarea(int id) async {
     Database db = await _openDB();
     return db.delete(
@@ -57,14 +61,13 @@ class Operation{
     );
   }
 
-
-  //insert actividad
+  //Inserta a la tabla actividad el nuevo registro
   static Future<int> insertActividad(Actividad actividad) async{
     Database database = await _openDB();
     return database.insert("actividad", actividad.toMap());
   }
 
-  //Mostrar actividad
+  //Ordena los registros de la mas proxima a la mas lejana por fechas
   static Future<List<Actividad>> actividades() async {
     Database db = await _openDB();
     final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM actividad ORDER BY fecha_realizacion ASC");
@@ -78,7 +81,8 @@ class Operation{
       );
     });
   }
-  //update actividad
+
+  //Update actividad
   static Future<int> updateActividad(Actividad actividad) async {
     Database db = await _openDB();
     return db.update(
@@ -89,7 +93,7 @@ class Operation{
     );
   }
 
-  //eliminar actividad
+  //Elimina la actividad en base a su cod/id
   static Future<int> deleteActividad(int id) async {
     Database db = await _openDB();
     return db.delete(
@@ -98,7 +102,8 @@ class Operation{
       whereArgs: [id],
     );
   }
-  //Mostrar dos tareas
+
+  //Devuelve los primeros dos registros si es que existen, de la tabla tarea
   static Future<List<Tarea>> tareas2() async {
     Database db = await _openDB();
     final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM tarea ORDER BY fecha_inicio ASC LIMIT 2");
@@ -111,7 +116,8 @@ class Operation{
       );
     });
   }
-  //Mostrar dos actividades
+
+  //Devuelve los primeros dos registros si es que existen, de la tabla actividad
   static Future<List<Actividad>> actividades2() async {
     Database db = await _openDB();
     final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM actividad ORDER BY fecha_realizacion ASC LIMIT 2");
@@ -125,7 +131,8 @@ class Operation{
       );
     });
   }
-  //Mostrar dos alarmas
+
+  //Devuelve los primeros dos registros si es que existen, de la tabla alarma
   static Future<List<AlarmaBD>> alarmas2() async {
     Database db = await _openDB();
     final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM alarma ORDER BY fecha ASC LIMIT 2");
@@ -140,13 +147,13 @@ class Operation{
   }
 
   //Alarmas
-  //insert alarma
+  //Inserta a la alarma tarea el nuevo registro
   static Future<int> insertAlarma(AlarmaBD alarma) async{
     Database database = await _openDB();
     return database.insert("alarma", alarma.toMap());
   }
 
-  //Mostrar alarma
+  //Ordena los registros de la mas proxima a la mas lejana por fechas
   static Future<List<AlarmaBD>> alarmas() async {
     Database db = await _openDB();
     final List<Map<String, dynamic>> maps = await db.rawQuery("SELECT * FROM alarma ORDER BY fecha ASC");
@@ -159,7 +166,8 @@ class Operation{
       );
     });
   }
-  //update alarma
+
+  //Update alarma
   static Future<int> updateAlarma(AlarmaBD alarma) async {
     Database db = await _openDB();
     return db.update(
@@ -170,7 +178,7 @@ class Operation{
     );
   }
 
-  //eliminar alarma
+  //Elimina la alarma en base a su cod/id
   static Future<int> deleteAlarma(int id) async {
     Database db = await _openDB();
     return db.delete(

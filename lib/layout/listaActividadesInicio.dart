@@ -40,6 +40,7 @@ class _ListaActividadesState extends State<ListaActividades> {
         ),
     );
   }
+
   _loadData () async{
     List<Actividad> auxActividad = await Operation.actividades2();
     setState((){

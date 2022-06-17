@@ -15,13 +15,14 @@ class _MyList extends StatefulWidget {
 class _MyListState extends State<_MyList> {
   List<Tarea> tareas = [];
   bool isChecked = false;
+
   @override
   void initState(){
     _loadData();
     super.initState();
   }
-  @override
 
+  @override
   Widget build(BuildContext context) {
     _loadData();
     return ListView.builder(
@@ -89,7 +90,6 @@ class _MyListState extends State<_MyList> {
   }
 }
 
-
 class ScreenWork extends StatefulWidget {
   List<Tarea> works;
   ScreenWork(this.works);
@@ -111,7 +111,6 @@ class _ScreenWorkState extends State<ScreenWork> {
     super.initState();
     _speech = stt.SpeechToText();
   }
-
 
   void insertTarea(Tarea tarea){
     tareas.add(tarea);
@@ -254,7 +253,7 @@ class _ScreenWorkState extends State<ScreenWork> {
                     ),
                   ),
                 ),
-                Expanded(
+                const Expanded(
                     child: _MyList()
                 ),
               ],
@@ -267,7 +266,7 @@ class _ScreenWorkState extends State<ScreenWork> {
             Positioned(
               right: 15,
               top: 90,
-              child: Container(
+              child: SizedBox(
                 height: 50,
                 width: 50,
                 child: FloatingActionButton(
@@ -461,6 +460,7 @@ class _ScreenWorkState extends State<ScreenWork> {
     }
     return flag;
   }
+
   modalAddTarea(BuildContext context){
     Widget okButton = TextButton(
         style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Color.fromRGBO(169, 151, 196, 1))),

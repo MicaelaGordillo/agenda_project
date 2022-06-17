@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
-
 import '../clases/operation.dart';
 
 class _MyList extends StatefulWidget {
@@ -14,8 +13,8 @@ class _MyList extends StatefulWidget {
 }
 
 class _MyListState extends State<_MyList> {
-  List<Color> colores = [Color.fromRGBO(245, 214, 199, 1),Color.fromRGBO(250, 246, 200, 1),Color.fromRGBO(211, 240, 210, 1),Color.fromRGBO(238, 235, 245, 1)];
-  List<Color> coloresText = [Color.fromRGBO(173, 66, 60, 1),Color.fromRGBO(117, 110, 8, 1),Color.fromRGBO(63, 157, 47, 1),Color.fromRGBO(113, 86, 150, 1)];
+  List<Color> colores = [const Color.fromRGBO(245, 214, 199, 1), const Color.fromRGBO(250, 246, 200, 1), const Color.fromRGBO(211, 240, 210, 1), const Color.fromRGBO(238, 235, 245, 1)];
+  List<Color> coloresText = [const Color.fromRGBO(173, 66, 60, 1), const Color.fromRGBO(117, 110, 8, 1), const Color.fromRGBO(63, 157, 47, 1), const Color.fromRGBO(113, 86, 150, 1)];
   List<Actividad> actividades = [];
 
   @override

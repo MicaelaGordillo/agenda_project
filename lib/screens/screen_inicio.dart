@@ -1,4 +1,3 @@
-
 import 'package:agenda_project/layout/listaActividadesInicio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +9,6 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 import '../layout/listaAlarmasInicio.dart';
 import '../layout/listaTareasInicio.dart';
-
 
 class ScreenMain extends StatefulWidget {
   List<Tarea> works;

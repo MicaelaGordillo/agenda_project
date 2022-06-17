@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import '../clases/alarm.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
-
 import '../clases/alarmaBD.dart';
 
 class _MyList extends StatefulWidget {
